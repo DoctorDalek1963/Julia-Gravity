@@ -129,16 +129,11 @@ function draw_gif(Δt::Float64)
 	# user with command line arguments
 
 	largebody = Body(6e24, 0.0, 0.0, 0.0, [0.0, 0.0, 50.0])
-	smallbody = Body(7.3e22, 375e6, 0.0, 0.0, [0.0, 500, 0.0])
-
-	# plotbound = 400e6
+	smallbody = Body(3e23, 375e6, 0.0, 0.0, [0.0, 250.0, 0.0])
 
 	# Initialize a 3D plot with 1 empty series
 	plt = plot3d(
 		2,
-		# xlim = (-1 * plotbound, plotbound),
-		# ylim = (-1 * plotbound, plotbound),
-		# zlim = (-1 * plotbound, plotbound),
 		xlim = (-100e6, 400e6),
 		ylim = (-200e6, 200e6),
 		zlim = (-10e3, 200e6),
@@ -150,7 +145,7 @@ function draw_gif(Δt::Float64)
 	push!(plt, smallbody.x, smallbody.y, smallbody.z)
 
 	# Build an animated gif by pushing new points to the plot, saving every 10th frame
-	@gif for i=1:6000
+	@gif for i in 1:2000
 		step!(largebody, smallbody, Δt)
 		push!(plt, 1, smallbody.x, smallbody.y, smallbody.z)
 		push!(plt, 2, largebody.x, largebody.y, largebody.z)
