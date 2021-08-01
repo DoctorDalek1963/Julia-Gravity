@@ -135,8 +135,8 @@ function draw_gif(Δt::Float64)
 	plt = plot3d(
 		2,
 		xlim = (-100e6, 400e6),
-		ylim = (-200e6, 200e6),
-		zlim = (-10e3, 200e6),
+		ylim = (-100e6, 100e6),
+		zlim = (-10e3, 100e6),
 		title = "2 Body Gravity Sim",
 		marker = 1,
 		legend = false,
@@ -145,7 +145,7 @@ function draw_gif(Δt::Float64)
 	push!(plt, smallbody.x, smallbody.y, smallbody.z)
 
 	# Build an animated gif by pushing new points to the plot, saving every 10th frame
-	@gif for i in 1:2000
+	@gif for i in 1:5200
 		step!(largebody, smallbody, Δt)
 		push!(plt, 1, smallbody.x, smallbody.y, smallbody.z)
 		push!(plt, 2, largebody.x, largebody.y, largebody.z)
@@ -153,5 +153,5 @@ function draw_gif(Δt::Float64)
 end
 
 if abspath(PROGRAM_FILE) == @__FILE__
-	draw_gif(720.0)
+	draw_gif(360.0)
 end
