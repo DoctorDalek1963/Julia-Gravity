@@ -2,17 +2,17 @@
 
 using Plots
 
-mutable struct Body
+mutable struct Body{T<:Float64}
 	# The mass of the body
-	m::Float64
+	m::T
 
 	# Its coords
-	x::Float64
-	y::Float64
-	z::Float64
+	x::T
+	y::T
+	z::T
 
 	# Its velocity as a vector of x y z values
-	s::Vector{Float64}
+	s::Vector{T}
 end
 
 function getforce(b1::Body, b2::Body)::Float64
