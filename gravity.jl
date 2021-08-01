@@ -131,14 +131,17 @@ function draw_gif(Δt::Float64)
 	largebody = Body(6e24, 0.0, 0.0, 0.0, [0.0, 0.0, 50.0])
 	smallbody = Body(7.3e22, 375e6, 0.0, 0.0, [0.0, 500, 0.0])
 
-	plotbound = 400e6
+	# plotbound = 400e6
 
 	# Initialize a 3D plot with 1 empty series
 	plt = plot3d(
-		1,
-		xlim = (-1 * plotbound, plotbound),
-		ylim = (-1 * plotbound, plotbound),
-		zlim = (-1 * plotbound, plotbound),
+		2,
+		# xlim = (-1 * plotbound, plotbound),
+		# ylim = (-1 * plotbound, plotbound),
+		# zlim = (-1 * plotbound, plotbound),
+		xlim = (-100e6, 400e6),
+		ylim = (-200e6, 200e6),
+		zlim = (-10e3, 200e6),
 		title = "2 Body Gravity Sim",
 		marker = 1,
 		legend = false,
@@ -149,7 +152,8 @@ function draw_gif(Δt::Float64)
 	# Build an animated gif by pushing new points to the plot, saving every 10th frame
 	@gif for i=1:6000
 		step!(largebody, smallbody, Δt)
-		push!(plt, smallbody.x, smallbody.y, smallbody.z)
+		push!(plt, 1, smallbody.x, smallbody.y, smallbody.z)
+		push!(plt, 2, largebody.x, largebody.y, largebody.z)
 	end every 10
 end
 
