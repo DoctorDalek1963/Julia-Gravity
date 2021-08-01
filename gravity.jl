@@ -140,7 +140,7 @@ function draw_gif(Δt::Float64)
 		ylim = (-1 * plotbound, plotbound),
 		zlim = (-1 * plotbound, plotbound),
 		title = "2 Body Gravity Sim",
-		marker = 2,
+		marker = 1,
 		legend = false,
 	)
 
