@@ -78,46 +78,38 @@ function getforcevector(b1::Body, b2::Body)::Vector{Float64}
 end
 
 """
-    addvectors(v1, v2) -> [float, float, float]
-
-Simply add two 3-component vectors component by component.
-"""
-addvectors(v1::Vector{Float64}, v2::Vector{Float64})::Vector{Float64} = [v1[1] + v2[1], v1[2] + v2[2], v1[3] + v2[3]]
-
-"""
-    updatevelocity!(b, force, Δt)
-
-Update the velocity of Body `b` with 3-component force vector `force` and time step of `Δt` seconds.
-"""
-function updatevelocity!(b::Body, force::Vector{Float64}, Δt::Float64)
-	for i = 1:3
-		# From a = \frac{v - u}{t} and F = ma, we get v = \frac{Ft}{m} + u
-		b.v[i] += ((force[i] * Δt) / b.m)
-	end
-end
-
-"""
     step!(b1, b2, Δt)
 
 Apply forces between Body objects `b1` and `b2` over time step `Δt` seconds.
 """
-function step!(b1::Body, b2::Body, Δt::Float64)
-	# We add the body's velocity to the force applied by gravity
-	# to get the resultant force
-	forceonb1 = addvectors(b1.v, getforcevector(b1, b2))
+function step!(bodies::Vector{Body{Float64}}, Δt::Float64)
+	for i in 1:length(bodies)
+		b = bodies[i]
 
-	updatevelocity!(b1, forceonb1, Δt)
+		forceonbody = b.v
+		# We loop over every body and if it's not the same one, we add the add the force
+		for j in 1:length(bodies)
+			if j != i
+				# We add the body's velocity to the force applied by gravity
+				# to get the resultant force
+				forceonbody += getforcevector(b, bodies[j])
+			end
+			
+		end
 
-	# We then adjust the position of the body to reflect this force
-	b1.x += Δt * b1.v[1]
-	b1.y += Δt * b1.v[2]
-	b1.z += Δt * b1.v[3]
+		# Update the velocity of the body
 
-	forceonb2 = addvectors(b2.v, getforcevector(b2, b1))
-	updatevelocity!(b2, forceonb2, Δt)
-	b2.x += Δt * b2.v[1]
-	b2.y += Δt * b2.v[2]
-	b2.z += Δt * b2.v[3]
+		# a = (v - u)/t and F = ma ⟹  v F = m * (v - u)/t
+		# ⟹  v = Ft/m + u
+
+		# Since u is the initial value, we can just use +=
+		b.v += ((forceonbody * Δt) / b.m)
+
+		# Then we update the position of the body using its velocity
+		b.x += Δt * b.v[1]
+		b.y += Δt * b.v[2]
+		b.z += Δt * b.v[3]
+	end
 end
 
 # I'm not going to give this function a docstring because I want to
@@ -128,27 +120,30 @@ function draw_gif(Δt::Float64)
 	# and make all parameter able to be specified by the
 	# user with command line arguments
 
-	largebody = Body(6e24, 0.0, 0.0, 0.0, [0.0, 0.0, 50.0])
-	smallbody = Body(3e23, 375e6, 0.0, 0.0, [0.0, 250.0, 0.0])
+	bodies = [
+		Body(6e24, 0.0, 0.0, 0.0, [0.0, 0.0, 50.0]),
+		Body(3e23, 375e6, 0.0, 0.0, [0.0, 250.0, 0.0]),
+		Body(5e22, 200e6, 0.0, 0.0, [100.0, 0.0, 0.0])
+	]
 
-	# Initialize a 3D plot with 1 empty series
+	# Initialize a 3D plot with 1 empty series for each body
 	plt = plot3d(
-		2,
+		length(bodies),
 		xlim = (-100e6, 400e6),
 		ylim = (-100e6, 100e6),
 		zlim = (-10e3, 100e6),
-		title = "2 Body Gravity Sim",
+		title = "$(length(bodies)) Body Gravity Sim",
 		marker = 1,
 		legend = false,
 	)
 
-	push!(plt, smallbody.x, smallbody.y, smallbody.z)
-
 	# Build an animated gif by pushing new points to the plot, saving every 10th frame
 	@gif for i in 1:5200
-		step!(largebody, smallbody, Δt)
-		push!(plt, 1, smallbody.x, smallbody.y, smallbody.z)
-		push!(plt, 2, largebody.x, largebody.y, largebody.z)
+		step!(bodies, Δt)
+		# Add the new positions of every Body to the plot
+		for i in 1:length(bodies)
+			push!(plt, i, bodies[i].x, bodies[i].y, bodies[i].z)
+		end
 	end every 10
 end
 
