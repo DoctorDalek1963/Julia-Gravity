@@ -112,41 +112,82 @@ function step!(bodies::Vector{Body{Float64}}, Δt::Float64)
 	end
 end
 
-# I'm not going to give this function a docstring because I want to
-# get rid of it. It's only here to test things with hard coded parameters
-function draw_gif(Δt::Float64)
-	# Right now, this function has hard coded parameters
-	# but in the future, I want to factor everything out
-	# and make all parameter able to be specified by the
-	# user with command line arguments
+"""
+    drawframes(bodies, framecount, Δt)
 
-	bodies = [
-		Body(6e24, 0.0, 0.0, 0.0, [0.0, 0.0, 50.0]),
-		Body(3e23, 375e6, 0.0, 0.0, [0.0, 250.0, 0.0]),
-		Body(5e22, 200e6, 0.0, 0.0, [100.0, 0.0, 0.0])
-	]
+Return frame data for the list of Body objects `bodies` with time step `Δt`.
 
-	# Initialize a 3D plot with 1 empty series for each body
+This frame data is a Vector{Vector{Vector{Float64}}}. It can be thought of as a list of frames,
+where each frame has a list of bodies, and each body has a list of x y z coordinates.
+
+See also: [`drawgif`](@ref), [`creategif`](@ref)
+"""
+function drawframes(bodies::Vector{Body{Float64}}, framecount::Int64, Δt::Float64)::Vector{Vector{Vector{Float64}}}
+	frames::Vector{Vector{Vector{Float64}}} = []
+
+	for _ in 1:framecount
+		step!(bodies, Δt)
+
+		# We build the position data for this frame
+		thisframe::Vector{Vector{Float64}} = [[bodies[i].x, bodies[i].y, bodies[i].z] for i in 1:length(bodies)]
+
+		push!(frames, thisframe)
+	end
+
+	return frames
+end
+
+"""
+    drawgif(positions)
+
+Draw a GIF using the position data.
+
+`positions` is a Vector{Vector{Vector{Float64}}}. It can be thought of as a list of frames,
+where each frame has a list of bodies, and each body has a list of x y z coordinates.
+
+See also: [`drawframes`](@ref), [`creategif`](@ref)
+"""
+function drawgif(positions::Vector{Vector{Vector{Float64}}})
+	# This line gets absolute value of every float in positions and then gets the max
+	# Because we're dealing with a nested vector, we have to flatten it, and then
+	# flatten the result, and then splat it for max
+	maxbound = 1.05 * max(abs.(Iterators.flatten(Iterators.flatten(positions)))...)
+
+	# This is just the number of bodies
+	n = length(positions[1])
+
 	plt = plot3d(
-		length(bodies),
-		xlim = (-100e6, 400e6),
-		ylim = (-100e6, 100e6),
-		zlim = (-10e3, 100e6),
-		title = "$(length(bodies)) Body Gravity Sim",
+		n,
+		xlim = (-1 * maxbound, maxbound),
+		ylim = (-1 * maxbound, maxbound),
+		zlim = (-1 * maxbound, maxbound),
+		title = "$n Body Gravity Sim",
 		marker = 1,
 		legend = false,
 	)
 
-	# Build an animated gif by pushing new points to the plot, saving every 10th frame
-	@gif for i in 1:5200
-		step!(bodies, Δt)
-		# Add the new positions of every Body to the plot
-		for i in 1:length(bodies)
-			push!(plt, i, bodies[i].x, bodies[i].y, bodies[i].z)
+	# For each frame
+	@gif for i in 1:length(positions)
+		# For each body in this frame
+		for j in 1:length(positions[i])
+			bodydata = positions[i][j]
+			push!(plt, j, bodydata[1], bodydata[2], bodydata[3])
 		end
 	end every 10
 end
 
+"""
+    creategif(bodies, framecount, Δt)
+
+Generate a GIF from the list of Body objects `bodies`, with `framecount` frames and a time step of `Δt` seconds.
+
+See also: [`drawgif`](@ref), [`drawframes`](@ref)
+"""
+creategif(bodies::Vector{Body{Float64}}, framecount::Int64, Δt::Float64) = drawgif(drawframes(bodies, framecount, Δt))
+
 if abspath(PROGRAM_FILE) == @__FILE__
-	draw_gif(360.0)
+	creategif([
+		Body(6e24, 0.0, 0.0, 0.0, [0.0, 0.0, 50.0]),
+		Body(3e23, 375e6, 0.0, 0.0, [0.0, 250.0, 0.0]),
+		], 5000, 360.0)
 end
