@@ -104,6 +104,13 @@ function step!(bodies::Vector{Body{Float64}}, Δt::Float64)
 
 		# Since u is the initial value, we can just use +=
 		b.v += ((forceonbody * Δt) / b.m)
+	end
+
+	# We need to wait until we've calculated all the forces before we start to change the positions,
+	# otherwise we would change a position and then calculate a force based on the new position,
+	# rather than the old one
+	for i in 1:length(bodies)
+		b = bodies[i]
 
 		# Then we update the position of the body using its velocity
 		b.x += Δt * b.v[1]
