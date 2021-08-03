@@ -83,6 +83,7 @@ end
 Apply forces between Body objects `b1` and `b2` over time step `Δt` seconds.
 """
 function step!(bodies::Vector{Body{Float64}}, Δt::Float64)
+	# Calculate the force on each body and update its velocity accordingly
 	for i in 1:length(bodies)
 		b = bodies[i]
 
@@ -193,7 +194,7 @@ See also: [`drawgif`](@ref), [`drawframes`](@ref)
 creategif(bodies::Vector{Body{Float64}}, framecount::Int64, Δt::Float64) = drawgif(drawframes(bodies, framecount, Δt))
 
 if abspath(PROGRAM_FILE) == @__FILE__
-	creategif([
+	@time creategif([
 		Body(6e24, 0.0, 0.0, 0.0, [0.0, 0.0, 50.0]),
 		Body(3e23, 375e6, 0.0, 0.0, [0.0, 250.0, 0.0]),
 		], 5000, 360.0)
