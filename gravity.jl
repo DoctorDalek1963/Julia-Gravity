@@ -1,6 +1,7 @@
 #!/usr/bin/env julia
 
 using Plots
+using StaticArrays
 
 """
     Body(m, x, y, z, v)
@@ -18,7 +19,7 @@ mutable struct Body{T <: Float64}
 	z::T
 
 	# Its velocity as a vector of x y z values
-	v::Vector{T}
+	v::MVector{3, T}
 end
 
 """
@@ -51,7 +52,7 @@ by `getforce(b1, b2)`. Angles must be computed separately.
 
 See also: [`getforce`](@ref)
 """
-function getforcevector(b1::Body, b2::Body)::Vector{Float64}
+function getforcevector(b1::Body, b2::Body)::MVector{3, Float64}
 	# azimuth is the angle on the x-y plane
 	Δx = b2.x - b1.x
 	Δy = b2.y - b1.y
@@ -74,7 +75,7 @@ function getforcevector(b1::Body, b2::Body)::Vector{Float64}
 	vec_y = xy_plane_hyp * sin(azimuth)
 	vec_x = xy_plane_hyp * cos(azimuth)
 
-	[vec_x, vec_y, vec_z]
+	MVector{3, Float64}(vec_x, vec_y, vec_z)
 end
 
 """
@@ -93,7 +94,7 @@ function step!(bodies::Vector{Body{Float64}}, Δt::Float64)
 			if j != i
 				# We add the body's velocity to the force applied by gravity
 				# to get the resultant force
-				forceonbody += getforcevector(b, bodies[j])
+				forceonbody .+= getforcevector(b, bodies[j])
 			end
 			
 		end
@@ -104,7 +105,8 @@ function step!(bodies::Vector{Body{Float64}}, Δt::Float64)
 		# ⟹  v = Ft/m + u
 
 		# Since u is the initial value, we can just use +=
-		b.v += ((forceonbody * Δt) / b.m)
+		# We actually need .+= here to broadcast over the MVector
+		b.v .+= ((forceonbody * Δt) / b.m)
 	end
 
 	# We need to wait until we've calculated all the forces before we start to change the positions,
@@ -130,14 +132,14 @@ where each frame has a list of bodies, and each body has a list of x y z coordin
 
 See also: [`drawgif`](@ref), [`creategif`](@ref)
 """
-function drawframes(bodies::Vector{Body{Float64}}, framecount::Int64, Δt::Float64)::Vector{Vector{Vector{Float64}}}
-	frames::Vector{Vector{Vector{Float64}}} = []
+function drawframes(bodies::Vector{Body{Float64}}, framecount::Int64, Δt::Float64)::Vector{Vector{SVector{3, Float64}}}
+	frames::Vector{Vector{SVector{3, Float64}}} = []
 
 	for _ in 1:framecount
 		step!(bodies, Δt)
 
 		# We build the position data for this frame
-		thisframe::Vector{Vector{Float64}} = [[bodies[i].x, bodies[i].y, bodies[i].z] for i in 1:length(bodies)]
+		thisframe::Vector{SVector{3, Float64}} = [SVector{3, Float64}(bodies[i].x, bodies[i].y, bodies[i].z) for i in 1:length(bodies)]
 
 		push!(frames, thisframe)
 	end
@@ -155,7 +157,7 @@ where each frame has a list of bodies, and each body has a list of x y z coordin
 
 See also: [`drawframes`](@ref), [`creategif`](@ref)
 """
-function drawgif(positions::Vector{Vector{Vector{Float64}}}, cube::Bool)
+function drawgif(positions::Vector{Vector{SVector{3, Float64}}}, cube::Bool)
 	# This is a multiplier to make th bounding box just a bit bigger than strictly necessary,
 	# just to make it look a bit nicer
 	multiplier = 1.05
@@ -217,7 +219,15 @@ creategif(bodies::Vector{Body{Float64}}, framecount::Int64, Δt::Float64, cube::
 
 if abspath(PROGRAM_FILE) == @__FILE__
 	@time creategif([
-		Body(6e24, 0.0, 0.0, 0.0, [0.0, 0.0, 50.0]),
-		Body(3e23, 375e6, 0.0, 0.0, [0.0, 250.0, 0.0]),
-		], 5000, 360.0)
+		# Body(6e24, 0.0, 0.0, 0.0, MVector{3, Float64}(0.0, 0.0, 50.0)),
+		# Body(2e23, 375e6, 0.0, 0.0, MVector{3, Float64}(0.0, 250.0, 0.0)),
+		Body(50.0, 0.0, 0.0, 0.0, MVector{3, Float64}(0.0, 0.0, 0.0)),
+		Body(50.0, 0.0, 0.0, 1.0, MVector{3, Float64}(0.0, 0.0, 0.0)),
+		Body(50.0, 0.0, 1.0, 0.0, MVector{3, Float64}(0.0, 0.0, 0.0)),
+		Body(50.0, 0.0, 1.0, 1.0, MVector{3, Float64}(0.0, 0.0, 0.0)),
+		Body(50.0, 1.0, 0.0, 0.0, MVector{3, Float64}(0.0, 0.0, 0.0)),
+		Body(50.0, 1.0, 0.0, 1.0, MVector{3, Float64}(0.0, 0.0, 0.0)),
+		Body(50.0, 1.0, 1.0, 0.0, MVector{3, Float64}(0.0, 0.0, 0.0)),
+		Body(50.0, 1.0, 1.0, 1.0, MVector{3, Float64}(0.0, 0.0, 0.0))
+		], 1300, 0.5)
 end
