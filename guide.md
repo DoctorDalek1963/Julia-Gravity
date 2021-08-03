@@ -22,7 +22,7 @@ Every value is parsed as a Float64 type, meaning that exponential notation (like
 
 For the `n` in the -m and -v flags, you can use a number to specify that body like normal (the list starts at index 1), or you can use a range or group, or you can target all of the bodies with `a`.
 A range is specified with `-` and is inclusive, so a range of `1-3` would target bodies 1, 2, and 3. A group is specified with `.` so a group of `1.4` would target bodies 1 and 4, but not 2, 3, or any other. Ranges and groups can also be combined, so, for example `1.3-5` would target bodies 1, 3, 4, and 5.
-This targeting of multiple bodies in the same argument cannot be done for -p, because having multiple bodies starting in the same position doesn't make sense, but it can be done manually if desired.
+This targeting of multiple bodies in the same argument cannot be done for -p, because having multiple bodies starting in the same position doesn't make sense. The calculation of force involves dividing by distance squared, so if two bodies have the same initial position, then we'd have to divide by 0, and the program would crash.
 
 Options are evaluated in the order that they are passed.
 
