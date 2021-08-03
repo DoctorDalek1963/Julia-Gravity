@@ -81,7 +81,7 @@ end
 
 Apply forces between Body objects `b1` and `b2` over time step `Δt` seconds.
 """
-function step!(bodies::Vector{Body{Float64}}, Δt::Float64)
+function step!(bodies::Vector{Body#={Float64}=#}, Δt::Float64)
 	# Calculate the force on each body and update its velocity accordingly
 	for i in 1:length(bodies)
 		b = bodies[i]
@@ -130,7 +130,7 @@ where each frame has a list of bodies, and each body has a list of x y z coordin
 
 See also: [`drawgif`](@ref), [`creategif`](@ref)
 """
-function drawframes(bodies::Vector{Body{Float64}}, framecount::Int64, Δt::Float64)::Vector{Vector{SVector{3, Float64}}}
+function drawframes(bodies::Vector{Body#={Float64}=#}, framecount::Int64, Δt::Float64)::Vector{Vector{SVector{3, Float64}}}
 	frames::Vector{Vector{SVector{3, Float64}}} = []
 
 	for _ in 1:framecount
@@ -213,4 +213,4 @@ Generate a GIF from the list of Body objects `bodies`, with `framecount` frames 
 
 See also: [`drawgif`](@ref), [`drawframes`](@ref)
 """
-creategif(bodies::Vector{Body{Float64}}, framecount::Int64, Δt::Float64, cube::Bool=false) = drawgif(drawframes(bodies, framecount, Δt), cube)
+creategif(bodies::Vector{Body#={Float64}=#}, framecount::Int64, Δt::Float64, cube::Bool=false) = drawgif(drawframes(bodies, framecount, Δt), cube)

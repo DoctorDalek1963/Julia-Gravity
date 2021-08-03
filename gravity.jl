@@ -2,14 +2,25 @@
 
 include("library.jl")
 
-Base.@kwdef mutable struct TemplateBody{T <: Union{Float64, Nothing}}
-	m::T=nothing
+Base.@kwdef mutable struct TemplateBody
+	m::Union{Float64, Nothing} = nothing
 
-	x::T=nothing
-	y::T=nothing
-	z::T=nothing
+	x::Union{Float64, Nothing} = nothing
+	y::Union{Float64, Nothing} = nothing
+	z::Union{Float64, Nothing} = nothing
 
-	v::MVector{3, T}=MVector{3, T}(nothing, nothing, nothing)
+	v::MVector{3, Union{Float64, Nothing}} = MVector{3, Union{Float64, Nothing}}(nothing, nothing, nothing)
+end
+
+# Body(tb::TemplateBody) = Body(tb.m, tb.x, tb.y, tb.z, MVector{3, Float64}(tb.v[1], tb.v[2], tb.v[3]))
+function Body(tb::TemplateBody)::Body{Float64}
+	if isnothing(tb.m); error("Mass must not be nothing"); end
+	if isnothing(tb.x); error("x must not be nothing"); end
+	if isnothing(tb.y); error("y must not be nothing"); end
+	if isnothing(tb.z); error("z must not be nothing"); end
+	if isnothing(tb.v[1]); error("Velocity must not be nothing"); end
+
+	Body{Float64}(tb.m, tb.x, tb.y, tb.z, MVector{3, Float64}(tb.v[1], tb.v[2], tb.v[3]))
 end
 
 function parsenums(num::String, len::Int64)::Vector{Int64}
@@ -34,14 +45,15 @@ function parsenums(num::String, len::Int64)::Vector{Int64}
 	else
 		# This is probably a really inefficent way to change the type from Vector{SubStringg{String}}
 		# to Vector{String} but it works
-		splitnum_substrings = split(num, ".")
-		splitnum = [string(splitnum_substrings[i]) for i in 1:length(splitnum_substrings)]
+		splitnum = split(num, ".")
 
 		# We recur down to get the ranges of each part of splitnum
 		# This is better than rewriting code
 		return collect(Iterators.flatten([parsenums(splitnum[i], len) for i in 1:length(splitnum)]))
 	end
 end
+
+parsenums(a::SubString{String}, b::Int64) = parsenums(string(a), b)
 
 function parseargs(progname::String, args::Vector{String})
 	connectedargs = join(args, " ")
@@ -83,6 +95,7 @@ function parseargs(progname::String, args::Vector{String})
 	n = 0
 	frames = 0
 	Δt::Float64 = 60.0
+	cube = false
 
 	# We loop through and get all the meta values before getting the body attributes
 	# This allows us to make a fixed length StaticArray of TemplateBody objects
@@ -93,22 +106,25 @@ function parseargs(progname::String, args::Vector{String})
 			if n != 0 # If we're trying to redefine n
 				throw(ErrorException("-n may only be defined once"))
 			else
-				n = parse(split(arg, " ")[2], Int64)
+				n = parse(Int64, split(arg, " ")[2])
 			end
 
 		elseif startswith(arg, "f")
 			if frames != 0 # If we're trying to redefine n
 				throw(ErrorException("-f may only be defined once"))
 			else
-				frames = parse(split(arg, " ")[2], Int64)
+				frames = parse(Int64, split(arg, " ")[2])
 			end
 
 		elseif startswith(arg, "t")
-			Δt = parse(split(arg, " ")[2], Int64)
+			Δt = parse(Int64, split(arg, " ")[2])
+
+		elseif arg == "cube"
+			cube = true
 		end
 	end
 
-	templatebodies = MVector{n, TemplateBody{Union{Float64, Nothing}}}([TemplateBody() for _ in 1:n]...)
+	templatebodies = MVector{n, TemplateBody}([TemplateBody() for _ in 1:n]...)
 
 	for i in 1:length(arglist)
 		arg = arglist[i]
@@ -118,11 +134,74 @@ function parseargs(progname::String, args::Vector{String})
 			nums = parsenums(datalist[1], length(templatebodies))
 			value = datalist[2]
 
-			for i in 1:nums
-				templatebodies[i].m = value
+			for i in 1:n
+				# If this is a body that we want to edit
+				if in(i, nums)
+					templatebodies[i].m = parse(Float64, value)
+				end
+			end
+
+		elseif startswith(arg, "p")
+			# Position doesn't allow multiple selection, so we don't need to parsenums()
+			datalist = split(split(arg, " ")[2], ",")
+			num = parse(Int64, datalist[1])
+
+			# If we've only got 1 number, use that for all
+			if length(datalist[2:end]) == 1
+				templatebodies[num].x = parse(Float64, datalist[2])
+				templatebodies[num].y = parse(Float64, datalist[2])
+				templatebodies[num].z = parse(Float64, datalist[2])
+			else
+				templatebodies[num].x = parse(Float64, datalist[2])
+				templatebodies[num].y = parse(Float64, datalist[3])
+				templatebodies[num].z = parse(Float64, datalist[4])
+			end
+
+		elseif startswith(arg, "v")
+			datalist = split(split(arg, " ")[2], ",")
+			nums = parsenums(datalist[1], length(templatebodies))
+
+			# If we've only got 1 number, use that for all
+			if length(datalist[2:end]) == 1
+				values = MVector{3, Float64}([parse(Float64, datalist[2]) for _ in 1:3]...)
+			else
+				values = MVector{3, Float64}([parse(Float64, datalist[i]) for i in 2:4]...)
+			end
+
+			for i in 1:n
+				if in(i, nums)
+					templatebodies[i].v = values
+				end
 			end
 		end
 	end
+
+	bodies = Body[]
+
+	for i in 1:length(templatebodies)
+		tb = templatebodies[i]
+
+		# Values in a similar order of magnitude to 1e22
+		if isnothing(tb.m); tb.m = 1e22 * rand() * rand(1:100); end
+
+		# Values from 0 to 50e6 with variation, positive and negative
+		if isnothing(tb.x); tb.x = randn() * rand(0:50000000); end
+		if isnothing(tb.y); tb.y = randn() * rand(0:50000000); end
+		if isnothing(tb.z); tb.z = randn() * rand(0:50000000); end
+
+		# Values from 0 to 500 with variation, positive and negative
+		# We only need to check tb.v[1] for nothing because v can only be set as a whole
+		if isnothing(tb.v[1]); tb.v = MVector{3, Float64}([randn() * rand(0:500) for _ in 1:3]...); end
+
+		# We created a custom Body constuctor earlier to construct a
+		# Body from a TemplateBody
+		push!(bodies, Body(tb))
+	end
+
+	# TODO: Print arguments
+
+	println("Simulating...")
+	creategif(bodies, frames, Δt, cube)
 end
 
 if abspath(PROGRAM_FILE) == @__FILE__
