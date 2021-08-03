@@ -155,20 +155,42 @@ where each frame has a list of bodies, and each body has a list of x y z coordin
 
 See also: [`drawframes`](@ref), [`creategif`](@ref)
 """
-function drawgif(positions::Vector{Vector{Vector{Float64}}})
-	# This line gets absolute value of every float in positions and then gets the max
-	# Because we're dealing with a nested vector, we have to flatten it, and then
-	# flatten the result, and then splat it for max
-	maxbound = 1.05 * max(abs.(Iterators.flatten(Iterators.flatten(positions)))...)
+function drawgif(positions::Vector{Vector{Vector{Float64}}}, cube::Bool)
+	# This is a multiplier to make th bounding box just a bit bigger than strictly necessary,
+	# just to make it look a bit nicer
+	multiplier = 1.05
+
+	if cube
+		# This line gets absolute value of every float in positions and then gets the max
+		# Because we're dealing with a nested vector, we have to flatten it, and then
+		# flatten the result, and then splat it for max
+		maxbound = multiplier * max(abs.(Iterators.flatten(Iterators.flatten(positions)))...)
+
+		xlimits = (-1 * maxbound, maxbound)
+		ylimits = (-1 * maxbound, maxbound)
+		zlimits = (-1 * maxbound, maxbound)
+	else
+		# These list comprehensions loop through the list to get the coords
+		# i is every frame in the positions list, and j is every body in each frame
+		# We only need to check length(positions[1]) to get j because the length of
+		# every sub-list is the same because every frame has the same number of bodies
+		xs = [positions[i][j][1] for i in 1:length(positions) for j in 1:length(positions[1])]
+		ys = [positions[i][j][2] for i in 1:length(positions) for j in 1:length(positions[1])]
+		zs = [positions[i][j][3] for i in 1:length(positions) for j in 1:length(positions[1])]
+
+		xlimits = (multiplier * min(xs...), multiplier * max(xs...))
+		ylimits = (multiplier * min(ys...), multiplier * max(ys...))
+		zlimits = (multiplier * min(zs...), multiplier * max(zs...))
+	end
 
 	# This is just the number of bodies
 	n = length(positions[1])
 
 	plt = plot3d(
-		n,
-		xlim = (-1 * maxbound, maxbound),
-		ylim = (-1 * maxbound, maxbound),
-		zlim = (-1 * maxbound, maxbound),
+		n, # This is n series so we can plot each body
+		xlim = xlimits,
+		ylim = ylimits,
+		zlim = zlimits,
 		title = "$n Body Gravity Sim",
 		marker = 1,
 		legend = false,
@@ -191,7 +213,7 @@ Generate a GIF from the list of Body objects `bodies`, with `framecount` frames 
 
 See also: [`drawgif`](@ref), [`drawframes`](@ref)
 """
-creategif(bodies::Vector{Body{Float64}}, framecount::Int64, Δt::Float64) = drawgif(drawframes(bodies, framecount, Δt))
+creategif(bodies::Vector{Body{Float64}}, framecount::Int64, Δt::Float64, cube::Bool=false) = drawgif(drawframes(bodies, framecount, Δt), cube)
 
 if abspath(PROGRAM_FILE) == @__FILE__
 	@time creategif([
