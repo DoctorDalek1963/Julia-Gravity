@@ -12,7 +12,7 @@ Base.@kwdef mutable struct TemplateBody{T <: Union{Float64, Nothing}}
 	v::MVector{3, T}=MVector{3, T}(nothing, nothing, nothing)
 end
 
-function parsenum(num::String, len::Int64)::Vector{Int64}
+function parsenums(num::String, len::Int64)::Vector{Int64}
 	if num == "a"
 		return [1:len;]
 
@@ -39,7 +39,7 @@ function parsenum(num::String, len::Int64)::Vector{Int64}
 
 		# We recur down to get the ranges of each part of splitnum
 		# This is better than rewriting code
-		return collect(Iterators.flatten([parsenum(splitnum[i], len) for i in 1:length(splitnum)]))
+		return collect(Iterators.flatten([parsenums(splitnum[i], len) for i in 1:length(splitnum)]))
 	end
 end
 
@@ -115,7 +115,7 @@ function parseargs(progname::String, args::Vector{String})
 
 		if startswith(arg, "m")
 			datalist = split(split(arg, " ")[2], ",")
-			nums = parsenum(datalist[1], length(templatebodies))
+			nums = parsenums(datalist[1], length(templatebodies))
 			value = datalist[2]
 
 			for i in 1:nums
