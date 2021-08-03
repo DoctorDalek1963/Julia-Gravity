@@ -214,18 +214,3 @@ Generate a GIF from the list of Body objects `bodies`, with `framecount` frames 
 See also: [`drawgif`](@ref), [`drawframes`](@ref)
 """
 creategif(bodies::Vector{Body{Float64}}, framecount::Int64, Δt::Float64, cube::Bool=false) = drawgif(drawframes(bodies, framecount, Δt), cube)
-
-if abspath(PROGRAM_FILE) == @__FILE__
-	@time creategif([
-		# Body(6e24, 0.0, 0.0, 0.0, MVector{3, Float64}(0.0, 0.0, 50.0)),
-		# Body(2e23, 375e6, 0.0, 0.0, MVector{3, Float64}(0.0, 250.0, 0.0)),
-		Body(50.0, 0.0, 0.0, 0.0, MVector{3, Float64}(0.0, 0.0, 0.0)),
-		Body(50.0, 0.0, 0.0, 1.0, MVector{3, Float64}(0.0, 0.0, 0.0)),
-		Body(50.0, 0.0, 1.0, 0.0, MVector{3, Float64}(0.0, 0.0, 0.0)),
-		Body(50.0, 0.0, 1.0, 1.0, MVector{3, Float64}(0.0, 0.0, 0.0)),
-		Body(50.0, 1.0, 0.0, 0.0, MVector{3, Float64}(0.0, 0.0, 0.0)),
-		Body(50.0, 1.0, 0.0, 1.0, MVector{3, Float64}(0.0, 0.0, 0.0)),
-		Body(50.0, 1.0, 1.0, 0.0, MVector{3, Float64}(0.0, 0.0, 0.0)),
-		Body(50.0, 1.0, 1.0, 1.0, MVector{3, Float64}(0.0, 0.0, 0.0))
-		], 1300, 0.5)
-end
