@@ -87,7 +87,7 @@ function step!(bodies::Vector{Body{Float64}}, Δt::Float64)
 	for i in 1:length(bodies)
 		b = bodies[i]
 
-		forceonbody = b.v
+		forceonbody = copy(b.v)
 		# We loop over every body and if it's not the same one, we add the add the force
 		for j in 1:length(bodies)
 			if j != i
