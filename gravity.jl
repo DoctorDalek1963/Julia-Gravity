@@ -100,7 +100,7 @@ function step!(bodies::Vector{Body{Float64}}, Δt::Float64)
 
 		# Update the velocity of the body
 
-		# a = (v - u)/t and F = ma ⟹  v F = m * (v - u)/t
+		# a = (v - u)/t and F = ma ⟹  F = m * (v - u)/t
 		# ⟹  v = Ft/m + u
 
 		# Since u is the initial value, we can just use +=
