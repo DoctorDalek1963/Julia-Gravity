@@ -108,10 +108,7 @@ function parseargs(progname::String, args::Vector{String})
 		end
 	end
 
-	templatebodies = MVector{n, TemplateBody{Union{Float64, Nothing}}}(
-					[Body(nothing, nothing, nothing, nothing, MVector{3, Union{Float64, Nothing}}(nothing, nothing, nothing))
-					for _ in 1:n]...
-					)
+	templatebodies = MVector{n, TemplateBody{Union{Float64, Nothing}}}([TemplateBody() for _ in 1:n]...)
 
 	for i in 1:length(arglist)
 		arg = arglist[i]
