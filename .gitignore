@@ -1,2 +1,4 @@
 Manifest.toml
+
 *.gif
+!cool_gifs/*.gif
