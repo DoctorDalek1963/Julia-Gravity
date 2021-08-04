@@ -12,7 +12,7 @@ Base.@kwdef mutable struct TemplateBody
 	v::MVector{3, Union{Float64, Nothing}} = MVector{3, Union{Float64, Nothing}}(nothing, nothing, nothing)
 end
 
-# Body(tb::TemplateBody) = Body(tb.m, tb.x, tb.y, tb.z, MVector{3, Float64}(tb.v[1], tb.v[2], tb.v[3]))
+# This is an alternate constructor method to convert a TemplateBody
 function Body(tb::TemplateBody)::Body{Float64}
 	if isnothing(tb.m); error("Mass must not be nothing"); end
 	if isnothing(tb.x); error("x must not be nothing"); end
@@ -43,8 +43,6 @@ function parsenums(num::String, len::Int64)::Vector{Int64}
 
 	# If it's both a range and a group
 	else
-		# This is probably a really inefficent way to change the type from Vector{SubStringg{String}}
-		# to Vector{String} but it works
 		splitnum = split(num, ".")
 
 		# We recur down to get the ranges of each part of splitnum
@@ -53,6 +51,7 @@ function parsenums(num::String, len::Int64)::Vector{Int64}
 	end
 end
 
+# When we recur, we're calling parsenums with SubString{String}, so we have to convert it to String
 parsenums(a::SubString{String}, b::Int64) = parsenums(string(a), b)
 
 function parseargs(progname::String, args::Vector{String})
