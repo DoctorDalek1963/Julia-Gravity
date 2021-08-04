@@ -167,7 +167,7 @@ function drawgif(positions::Vector{Vector{SVector{3, Float64}}}, cube::Bool, bou
 
 	if cube && !isnothing(bounds)
 		# We get the maximum absolute value in the bounds and use that to build the cube
-		maxbound = multiplier * max(abs.(Iterators.flatten(positions))...)
+		maxbound = multiplier * max(abs.(Iterators.flatten(bounds))...)
 
 		xlimits = (-1 * maxbound, maxbound)
 		ylimits = (-1 * maxbound, maxbound)
