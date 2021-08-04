@@ -2,6 +2,13 @@
 
 include("library.jl")
 
+"""
+	TemplateBody(m, x, y, z, v)
+
+Create a template of a celestial body. By default, all arguments are `nothing`.
+
+See also: [`Body`](@ref)
+"""
 Base.@kwdef mutable struct TemplateBody
 	m::Union{Float64, Nothing} = nothing
 
@@ -12,41 +19,65 @@ Base.@kwdef mutable struct TemplateBody
 	v::MVector{3, Union{Float64, Nothing}} = MVector{3, Union{Float64, Nothing}}(nothing, nothing, nothing)
 end
 
-# This is an alternate constructor method to convert a TemplateBody
-function Body(tb::TemplateBody)::Body{Float64}
+"""
+    Body(tb::TemplateBody)
+
+Create a Body object from a TemplateBody object. Will throw errors if any attribute is `nothing`.
+"""
+function Body(tb::TemplateBody)::Body
 	if isnothing(tb.m); error("Mass must not be nothing"); end
 	if isnothing(tb.x); error("x must not be nothing"); end
 	if isnothing(tb.y); error("y must not be nothing"); end
 	if isnothing(tb.z); error("z must not be nothing"); end
-	if isnothing(tb.v[1]); error("Velocity must not be nothing"); end
+	if isnothing(tb.v[1]); error("Velocity x component must not be nothing"); end
+	if isnothing(tb.v[2]); error("Velocity y component must not be nothing"); end
+	if isnothing(tb.v[3]); error("Velocity z component must not be nothing"); end
 
 	Body{Float64}(tb.m, tb.x, tb.y, tb.z, MVector{3, Float64}(tb.v[1], tb.v[2], tb.v[3]))
 end
 
+"""
+    parsenums(num::String, len::Int64)
+
+Parse the string `num` and return a list of all indices to target.
+
+`len` is the length of the bodies list. If any number is larger than it,
+then we throw an error.
+
+See also: [`parseargs`](@ref)
+"""
 function parsenums(num::String, len::Int64)::Vector{Int64}
 	if num == "a"
 		return [1:len;]
 
 	# If it's not a range or group
 	elseif !occursin("-", num) && !occursin(".", num)
-		return [parse(Int64, num)]
+		n = parse(Int64, num)
+		if n > len; error("You cannot select body $n; there are only $len bodies."); end
+		return [n]
 
 	# If it's not a range but it is a group
 	elseif !occursin("-", num) && occursin(".", num)
-		return [parse(Int64, i) for i in split(num, ".")]
+		ns = [parse(Int64, i) for i in split(num, ".")]
+
+		if max(ns...) > len; error("You cannot select body $(max(ns...)); there are only $len bodies."); end
+		return ns
 
 	# If it's a range but not a group
 	elseif occursin("-", num) && !occursin(".", num)
 		first = parse(Int64, split(num, "-")[1])
 		second = parse(Int64, split(num, "-")[2])
-		return [first:second;]
+		ns = [first:second;]
+
+		if max(ns...) > len; error("You cannot select body $(max(ns...)); there are only $len bodies."); end
+		return ns
 
 	# If it's both a range and a group
 	else
 		splitnum = split(num, ".")
 
 		# We recur down to get the ranges of each part of splitnum
-		# This is better than rewriting code
+		# We don't need to check that all nums are <= len, because we do that check in the recurrance
 		return collect(Iterators.flatten([parsenums(splitnum[i], len) for i in 1:length(splitnum)]))
 	end
 end
@@ -54,6 +85,13 @@ end
 # When we recur, we're calling parsenums with SubString{String}, so we have to convert it to String
 parsenums(a::SubString{String}, b::Int64) = parsenums(string(a), b)
 
+"""
+    parseargs(progname, args)
+
+Parse the arguments and call creategif(). Should be called with PROGRAM_FILE and ARGS.
+
+See also: [`parsenum`](@ref)
+"""
 function parseargs(progname::String, args::Vector{String})
 	# We need to put a space in front to split by " -" and avoid breaking negatives
 	connectedargs = " " * join(args, " ")
@@ -143,6 +181,7 @@ function parseargs(progname::String, args::Vector{String})
 			# Position doesn't allow multiple selection, so we don't need to parsenums()
 			datalist = split(split(arg, " ")[2], ",")
 			num = parse(Int64, datalist[1])
+			if num > length(templatebodies); error("You cannot select body $n; there are only $(length(templatebodies)) bodies."); end
 
 			# If we've only got 1 number, use that for all
 			if length(datalist[2:end]) == 1
