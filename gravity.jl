@@ -16,7 +16,7 @@ Base.@kwdef mutable struct TemplateBody
 	y::Union{Float64, Nothing} = nothing
 	z::Union{Float64, Nothing} = nothing
 
-	v::MVector{3, Union{Float64, Nothing}} = MVector{3, Union{Float64, Nothing}}(nothing, nothing, nothing)
+	v::Vector{Union{Float64, Nothing}} = [nothing, nothing, nothing]
 end
 
 """
@@ -167,7 +167,7 @@ function parseargs(progname::String, args::Vector{String})
 
 		if startswith(arg, "m")
 			datalist = split(split(arg, " ")[2], ",")
-			nums = parsenums(datalist[1], length(templatebodies))
+			nums = parsenums(datalist[1], n)
 			value = datalist[2]
 
 			for i in 1:n
@@ -178,36 +178,74 @@ function parseargs(progname::String, args::Vector{String})
 			end
 
 		elseif startswith(arg, "p")
-			# Position doesn't allow multiple selection, so we don't need to parsenums()
-			datalist = split(split(arg, " ")[2], ",")
-			num = parse(Int64, datalist[1])
-			if num > length(templatebodies); error("You cannot select body $n; there are only $(length(templatebodies)) bodies."); end
+			data = split(arg, " ")[2]
+			datalist = split(data, ",")
 
-			# If we've only got 1 number, use that for all
-			if length(datalist[2:end]) == 1
-				templatebodies[num].x = parse(Float64, datalist[2])
-				templatebodies[num].y = parse(Float64, datalist[2])
-				templatebodies[num].z = parse(Float64, datalist[2])
+			# Position doesn't allow multiple selection, so we don't need to parsenums()
+			num = parse(Int64, datalist[1])
+			if num > n; error("You cannot select body $num; there are only $n bodies."); end
+
+			# If we don't have any special selectors and they're just positional
+			if !occursin("x", data) && !occursin("y", data) && !occursin("z", data)
+				# If we've only got 1 number, use that for all
+				if length(datalist[2:end]) == 1
+					templatebodies[num].x = parse(Float64, datalist[2])
+					templatebodies[num].y = parse(Float64, datalist[2])
+					templatebodies[num].z = parse(Float64, datalist[2])
+				else
+					templatebodies[num].x = parse(Float64, datalist[2])
+					templatebodies[num].y = parse(Float64, datalist[3])
+					templatebodies[num].z = parse(Float64, datalist[4])
+				end
+
+			# If we've got explicit values
 			else
-				templatebodies[num].x = parse(Float64, datalist[2])
-				templatebodies[num].y = parse(Float64, datalist[3])
-				templatebodies[num].z = parse(Float64, datalist[4])
+				for i in 2:length(datalist)
+					value = datalist[i]
+
+					# If we get a value that doesn't start with x, y, or z, then we just ignore its
+					# because we can't mix explicit coords with positional coords
+					if startswith(value, "x"); templatebodies[num].x = parse(Float64, value[2:end]); end
+					if startswith(value, "y"); templatebodies[num].y = parse(Float64, value[2:end]); end
+					if startswith(value, "z"); templatebodies[num].z = parse(Float64, value[2:end]); end
+				end
 			end
 
 		elseif startswith(arg, "v")
-			datalist = split(split(arg, " ")[2], ",")
-			nums = parsenums(datalist[1], length(templatebodies))
+			data = split(arg, " ")[2]
+			datalist = split(data, ",")
 
-			# If we've only got 1 number, use that for all
-			if length(datalist[2:end]) == 1
-				values = MVector{3, Float64}([parse(Float64, datalist[2]) for _ in 1:3]...)
+			nums = parsenums(datalist[1], n)
+
+			# If we don't have any special selectors and they're just positional
+			if !occursin("x", data) && !occursin("y", data) && !occursin("z", data)
+				# If we've only got 1 number, use that for all
+				if length(datalist[2:end]) == 1
+					values = [parse(Float64, datalist[2]) for _ in 1:3]
+				else
+					values = [parse(Float64, datalist[i]) for i in 2:4]
+				end
+
+				for i in 1:n
+					if in(i, nums)
+						templatebodies[i].v = values
+					end
+				end
+
+			# If we've got explicit values
 			else
-				values = MVector{3, Float64}([parse(Float64, datalist[i]) for i in 2:4]...)
-			end
+				for i in 2:length(datalist)
+					value = datalist[i]
 
-			for i in 1:n
-				if in(i, nums)
-					templatebodies[i].v = values
+					for i in 1:n
+						if in(i, nums)
+							# If we get a value that doesn't start with x, y, or z, then we just ignore its
+							# because we can't mix explicit values with positional values
+							if startswith(value, "x"); templatebodies[i].v[1] = parse(Float64, value[2:end]); end
+							if startswith(value, "y"); templatebodies[i].v[2] = parse(Float64, value[2:end]); end
+							if startswith(value, "z"); templatebodies[i].v[3] = parse(Float64, value[2:end]); end
+						end
+					end
 				end
 			end
 		end
@@ -215,7 +253,7 @@ function parseargs(progname::String, args::Vector{String})
 
 	bodies = Body[]
 
-	for i in 1:length(templatebodies)
+	for i in 1:n
 		tb = templatebodies[i]
 
 		# Values in a similar order of magnitude to 1e22
@@ -227,8 +265,9 @@ function parseargs(progname::String, args::Vector{String})
 		if isnothing(tb.z); tb.z = randn() * rand(0:50000000); end
 
 		# Values from 0 to 500 with variation, positive and negative
-		# We only need to check tb.v[1] for nothing because v can only be set as a whole
-		if isnothing(tb.v[1]); tb.v = MVector{3, Float64}([randn() * rand(0:500) for _ in 1:3]...); end
+		if isnothing(tb.v[1]); tb.v[1] = randn() * rand(0:500); end
+		if isnothing(tb.v[2]); tb.v[2] = randn() * rand(0:500); end
+		if isnothing(tb.v[3]); tb.v[3] = randn() * rand(0:500); end
 
 		# We created a custom Body constuctor earlier to construct a
 		# Body from a TemplateBody
