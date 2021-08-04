@@ -198,7 +198,18 @@ function parseargs(progname::String, args::Vector{String})
 	end
 
 	# TODO: Print arguments
+	println("These are the arguments needed to recreate this simulation:")
 
+	print("$progname -n $n -f $frames -t $Δt")
+	if cube; print(" --cube"); end
+
+	for i in 1:length(bodies)
+		b = bodies[i]
+		print(" -m $i,$(b.m) -p $i,$(b.x),$(b.y),$(b.z) -v $i,$(b.v[1]),$(b.v[2]),$(b.v[3])")
+	end
+
+	println()
+	println()
 	println("Simulating...")
 	creategif(bodies, frames, Δt, cube)
 end
