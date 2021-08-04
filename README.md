@@ -26,7 +26,8 @@ These are all optional and if any attribute is not specified for any particular 
 
 The program will output the full commands necessary to recreate a simulation, so if you generate one with random attributes, you can use this output to generate the same simulation, but with more frames, for example.
 
-With the `-p` and `-v` flags, you can either specify all `x,y,z` coordinates or you can specify a single number in place of `x,y,z` to set them all to the same thing.
+With the `-p` and `-v` flags, you can either specify all `x,y,z` coordinates or you can specify a single number in place of `x,y,z` to set them all to the same thing.  
+You can also use precise selectors, so you can specify just part of the attribute. For example, `-v a,x15,z0` will give all bodies a velocity of 15 m/s in the x direction, 0 m/s in the z direction, and a random velocity in the y direction.
 
 Every attribute is parsed as a `Float64` type, meaning that exponential notation (like `1e6` for 1 million) is allowed.
 
