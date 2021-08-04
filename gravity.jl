@@ -81,7 +81,7 @@ function parseargs(progname::String, args::Vector{String})
 		return
 	end
 
-	# We split the args by "-", get rid of the "" in the list, and strip
+	# We split the args by " -", get rid of the "" in the list, and strip
 	# the whitespace from the end of each element
 	arglist = strip.(split(connectedargs, " -", keepempty=false))
 
