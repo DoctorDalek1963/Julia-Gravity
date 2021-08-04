@@ -181,8 +181,15 @@ function parseargs(progname::String, args::Vector{String})
 			data = split(arg, " ")[2]
 			datalist = split(data, ",")
 
-			# Position doesn't allow multiple selection, so we don't need to parsenums()
-			num = parse(Int64, datalist[1])
+			# We use parsenums() just to check that the user only gave 1 number,
+			# so that we can give them a better error message
+			nums = parsenums(datalist[1], n)
+			if length(nums) > 1
+				error("-p only accepts single number selectors; \"$(datalist[1])\" is invalid")
+			else
+				num = nums[1]
+			end
+
 			if num > n; error("You cannot select body $num; there are only $n bodies."); end
 
 			# If we don't have any special selectors and they're just positional
