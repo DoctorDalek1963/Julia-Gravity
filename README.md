@@ -2,13 +2,15 @@
 
 This is a small Julia project to do an n-body gravity simulation with command line argument processing. This is my first proper Julia project and I want to use it to learn how to use the language properly.
 
-# Usage
+# Command Line Arguments
+
+## Usage
 `./gravity.jl [--help] -n <number> -f <frames> [-t <seconds>] [--cube] [--initial-bounds] [options]`
 
 ## Description
 gravity.jl is a program designed to simulate gravity with any number of bodies and produce a GIF.
 
-The user must specify a number of bodies with `-n`, and a number of frames with `-f`. (A value of 2000 to 4000 frames typically produces a GIF long enough to see interesting movement while being quite quick to process, although this will vary based on other parameters.) A time step can also be specified in seconds with `-t`. This defaults to 60 seconds.
+The user must specify a number of bodies with `-n`, and a number of frames with `-f`. (A value of 2000 to 4000 frames typically produces a GIF long enough to see interesting movement while being quite quick to process, although this will vary based on other parameters.) A time step in seconds can also be specified with `-t`. This defaults to 60 seconds.
 
 `-n` and `-f` must be integers, but `-t` can be any real number.
 
@@ -48,3 +50,13 @@ Options are evaluated in the order that they are passed.
 `./gravity.jl -n 2 -f 3000 -t 300 -m 1,6e24 -m 2,2e23 -p 1,0 -p 2,375e6,0,0 -v 1,0,0,50 -v 2,0,-250,0` would create a simulation of 2 bodies with 3000 frames and a time step of 5 minutes. Body 1 would have a mass of 6e24 kg, be located at (0, 0, 0), and have a velocity of 50 m/s in the positive z direction. Body 2 would have a mass of 2e23 kg, be located 375 million metres from the origin in the positive x direction, and have a velocity of 250 m/s in the negative y direction.
 
 `./gravity.jl -n 5 -f 5000` would create a simulation of 5 bodies with 5000 frames and a time step of 60 seconds. Every attribute of every body would be randomly generated every time this command is run, but the program will output what flags would need to be needed to generate the exact same simulation again.
+
+# Installation
+
+To use this software on your own machine, you'll have to install [Julia](https://julialang.org/downloads/). If you're on Windows, download the installer and tick the `Add Julia to PATH` box in the installer. This is necessary. If you're on MacOS or Linux, just download the binary package and put it wherever you want, just make sure you add the executable to your PATH.
+
+To download Julia-Gravity, click the green `Code` button at the top of this GitHub page, and select `Download ZIP`. Then extract the zip file to a suitable directory.
+
+Before first usage, open a terminal or command prompt in the directory, and run `julia install_deps.jl`. This will install the dependencies and will probably take some time.
+
+Now you're ready to run `gravity.jl` with the arguments explained above. On MacOS and Linux, you can call it as `./gravity.jl`, but on Windows, you need to call it as `julia gravity.jl` and then specify the arguments.
