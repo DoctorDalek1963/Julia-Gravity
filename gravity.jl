@@ -55,7 +55,8 @@ end
 parsenums(a::SubString{String}, b::Int64) = parsenums(string(a), b)
 
 function parseargs(progname::String, args::Vector{String})
-	connectedargs = join(args, " ")
+	# We need to put a space in front to split by " -" and avoid breaking negatives
+	connectedargs = " " * join(args, " ")
 
 	if occursin("--guide", connectedargs)
 		open("guide.md", "r") do f
@@ -89,7 +90,7 @@ function parseargs(progname::String, args::Vector{String})
 
 	# We split the args by "-", get rid of the "" in the list, and strip
 	# the whitespace from the end of each element
-	arglist = strip.(split(connectedargs, "-", keepempty=false))
+	arglist = strip.(split(connectedargs, " -", keepempty=false))
 
 	n = 0
 	frames = 0
