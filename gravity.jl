@@ -70,18 +70,19 @@ function parseargs(progname::String, args::Vector{String})
 				Usage: $progname [--help | --guide] [--cube] -n <number> -f <frames> [-t <time_step>] [options]
 
 				Options:
-				  --help, -h     Display this help text.
-				  --guide        Display the full guide for all options.
+				  --help, -h         Display this help text.
+				  --guide            Display the full guide for all options.
 
-				  --cube         Give the plot cubic bounds.
+				  --cube             Give the plot cubic bounds.
+				  --initial-bounds   Give the plot bounds to only include the initial positions.
 
-				  -n <number>    The number of bodies.
-				  -f <frames>    The number of frames to use in the GIF.
-				  -t <seconds>   The time step in seconds (default 60).
+				  -n <number>        The number of bodies.
+				  -f <frames>        The number of frames to use in the GIF.
+				  -t <seconds>       The time step in seconds (default 60).
 
-				  -m n,m         Set the mass of body number n to be m kg.
-				  -p n,x,y,z     Set the initial position of body number n to be (x, y, z).
-				  -v n,x,y,z     Set the initial velocity of body number n to be [x, y, z].
+				  -m n,m             Set the mass of body number n to be m kg.
+				  -p n,x,y,z         Set the initial position of body number n to be (x, y, z).
+				  -v n,x,y,z         Set the initial velocity of body number n to be [x, y, z].
 
 				See --guide for a full guide on using the options.
 				""")
@@ -96,6 +97,7 @@ function parseargs(progname::String, args::Vector{String})
 	frames = 0
 	Δt::Float64 = 60.0
 	cube = false
+	initialbounds = false
 
 	# We loop through and get all the meta values before getting the body attributes
 	# This allows us to make a fixed length StaticArray of TemplateBody objects
@@ -117,10 +119,14 @@ function parseargs(progname::String, args::Vector{String})
 			end
 
 		elseif startswith(arg, "t")
-			Δt = parse(Int64, split(arg, " ")[2])
+			Δt = parse(Float64, split(arg, " ")[2])
 
-		elseif arg == "cube"
+		# We need 1 "-" here because we split by " -" and these args are long form
+		elseif arg == "-cube"
 			cube = true
+
+		elseif arg == "-initial-bounds"
+			initialbounds = true
 		end
 	end
 
@@ -198,11 +204,26 @@ function parseargs(progname::String, args::Vector{String})
 		push!(bodies, Body(tb))
 	end
 
-	# TODO: Print arguments
+	# If desired, we get the initial bounds and use those
+	if initialbounds
+		xs = [bodies[i].x for i in 1:length(bodies)]
+		ys = [bodies[i].y for i in 1:length(bodies)]
+		zs = [bodies[i].z for i in 1:length(bodies)]
+
+		bounds = [
+				(min(xs...), max(xs...)),
+				(min(ys...), max(ys...)),
+				(min(zs...), max(zs...))
+				]
+	else
+		bounds = nothing
+	end
+
 	println("These are the arguments needed to recreate this simulation:")
 
 	print("$progname -n $n -f $frames -t $Δt")
 	if cube; print(" --cube"); end
+	if initialbounds; print(" --initial-bounds"); end
 
 	for i in 1:length(bodies)
 		b = bodies[i]
@@ -212,7 +233,7 @@ function parseargs(progname::String, args::Vector{String})
 	println()
 	println()
 	println("Simulating...")
-	creategif(bodies, frames, Δt, cube)
+	creategif(bodies, frames, Δt, cube, bounds)
 end
 
 if abspath(PROGRAM_FILE) == @__FILE__

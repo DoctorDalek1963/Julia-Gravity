@@ -81,7 +81,7 @@ end
 
 Apply forces between Body objects `b1` and `b2` over time step `Δt` seconds.
 """
-function step!(bodies::Vector{Body#={Float64}=#}, Δt::Float64)
+function step!(bodies::Vector{Body}, Δt::Float64)
 	# Calculate the force on each body and update its velocity accordingly
 	for i in 1:length(bodies)
 		b = bodies[i]
@@ -130,7 +130,7 @@ where each frame has a list of bodies, and each body has a list of x y z coordin
 
 See also: [`drawgif`](@ref), [`creategif`](@ref)
 """
-function drawframes(bodies::Vector{Body#={Float64}=#}, framecount::Int64, Δt::Float64)::Vector{Vector{SVector{3, Float64}}}
+function drawframes(bodies::Vector{Body}, framecount::Int64, Δt::Float64)::Vector{Vector{SVector{3, Float64}}}
 	frames::Vector{Vector{SVector{3, Float64}}} = []
 
 	for _ in 1:framecount
@@ -146,21 +146,40 @@ function drawframes(bodies::Vector{Body#={Float64}=#}, framecount::Int64, Δt::F
 end
 
 """
-    drawgif(positions)
+    drawgif(positions, cube=false, bounds=nothing)
 
 Draw a GIF using the position data.
 
 `positions` is a Vector{Vector{Vector{Float64}}}. It can be thought of as a list of frames,
 where each frame has a list of bodies, and each body has a list of x y z coordinates.
 
+`cube` is a bool for whether to draw the plot bounds as a cube.
+
+`bounds` is a Vector{Tuple{Float64, Float64}} - a list of xlimits, ylimits, and zlimits.
+If it's nothing (by default), then the bounds will be auto-generated.
+
 See also: [`drawframes`](@ref), [`creategif`](@ref)
 """
-function drawgif(positions::Vector{Vector{SVector{3, Float64}}}, cube::Bool)
-	# This is a multiplier to make th bounding box just a bit bigger than strictly necessary,
+function drawgif(positions::Vector{Vector{SVector{3, Float64}}}, cube::Bool, bounds::Union{Nothing, Vector{Tuple{Float64, Float64}}}=nothing)
+	# This is a multiplier to make the bounding box just a bit bigger than strictly necessary,
 	# just to make it look a bit nicer
 	multiplier = 1.05
 
-	if cube
+	if cube && !isnothing(bounds)
+		# We get the maximum absolute value in the bounds and use that to build the cube
+		maxbound = multiplier * max(abs.(Iterators.flatten(positions))...)
+
+		xlimits = (-1 * maxbound, maxbound)
+		ylimits = (-1 * maxbound, maxbound)
+		zlimits = (-1 * maxbound, maxbound)
+
+	elseif !cube && !isnothing(bounds)
+		# We just use the bounds given, multiplied by the multiplier
+		xlimits = (multiplier * bounds[1][1], multiplier * bounds[1][2])
+		ylimits = (multiplier * bounds[2][1], multiplier * bounds[2][2])
+		zlimits = (multiplier * bounds[3][1], multiplier * bounds[3][2])
+
+	elseif cube && isnothing(bounds)
 		# This line gets absolute value of every float in positions and then gets the max
 		# Because we're dealing with a nested vector, we have to flatten it, and then
 		# flatten the result, and then splat it for max
@@ -169,6 +188,8 @@ function drawgif(positions::Vector{Vector{SVector{3, Float64}}}, cube::Bool)
 		xlimits = (-1 * maxbound, maxbound)
 		ylimits = (-1 * maxbound, maxbound)
 		zlimits = (-1 * maxbound, maxbound)
+
+	# Not cube or explicit bounds
 	else
 		# These list comprehensions loop through the list to get the coords
 		# i is every frame in the positions list, and j is every body in each frame
@@ -207,10 +228,15 @@ function drawgif(positions::Vector{Vector{SVector{3, Float64}}}, cube::Bool)
 end
 
 """
-    creategif(bodies, framecount, Δt)
+    creategif(bodies, framecount, Δt, cube=false, bounds=nothing)
 
 Generate a GIF from the list of Body objects `bodies`, with `framecount` frames and a time step of `Δt` seconds.
 
+`cube` is a bool for whether to draw the plot bounds as a cube.
+
+`bounds` is a Vector{Tuple{Float64, Float64}} - a list of xlimits, ylimits, and zlimits.
+If it's nothing (by default), then the plot bounds will be auto-generated.
+
 See also: [`drawgif`](@ref), [`drawframes`](@ref)
 """
-creategif(bodies::Vector{Body#={Float64}=#}, framecount::Int64, Δt::Float64, cube::Bool=false) = drawgif(drawframes(bodies, framecount, Δt), cube)
+creategif(bodies::Vector{Body}, framecount::Int64, Δt::Float64, cube::Bool=false, bounds::Union{Nothing, Vector{Tuple{Float64, Float64}}}=nothing) = drawgif(drawframes(bodies, framecount, Δt), cube, bounds)
