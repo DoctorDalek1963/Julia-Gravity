@@ -3,7 +3,7 @@
 include("library.jl")
 
 """
-	TemplateBody(m, x, y, z, v)
+    TemplateBody(m, x, y, z, v)
 
 Create a template of a celestial body. By default, all arguments are `nothing`.
 
