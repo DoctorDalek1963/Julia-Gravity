@@ -58,20 +58,12 @@ function parseargs(progname::String, args::Vector{String})
 	# We need to put a space in front to split by " -" and avoid breaking negatives
 	connectedargs = " " * join(args, " ")
 
-	if occursin("--guide", connectedargs)
-		open("guide.md", "r") do f
-			println(read(f, String))
-		end
-		return
-	end
-
 	if occursin("--help", connectedargs) || occursin("-h", connectedargs) || length(args) < 4 # We need at least 4 args
 		println("""
-				Usage: $progname [--help | --guide] [--cube] -n <number> -f <frames> [-t <time_step>] [options]
+				Usage: $progname [--help] [--cube] -n <number> -f <frames> [-t <seconds>] [options]
 
 				Options:
 				  --help, -h         Display this help text.
-				  --guide            Display the full guide for all options.
 
 				  --cube             Give the plot cubic bounds.
 				  --initial-bounds   Give the plot bounds to only include the initial positions.
@@ -84,7 +76,7 @@ function parseargs(progname::String, args::Vector{String})
 				  -p n,x,y,z         Set the initial position of body number n to be (x, y, z).
 				  -v n,x,y,z         Set the initial velocity of body number n to be [x, y, z].
 
-				See --guide for a full guide on using the options.
+				See README.md (read it at https://github.com/DoctorDalek1963/Julia-Gravity) for a full guide on using the options.
 				""")
 		return
 	end
