@@ -131,7 +131,7 @@ where each frame has a list of bodies, and each body has a list of x y z coordin
 See also: [`drawgif`](@ref), [`creategif`](@ref)
 """
 function drawframes(bodies::Vector{Body}, framecount::Int64, Δt::Float64)::Vector{Vector{SVector{3, Float64}}}
-	frames::Vector{Vector{SVector{3, Float64}}} = []
+	frames::Vector{Vector{SVector{3, Float64}}} = [[SVector{3, Float64}(bodies[i].x, bodies[i].y, bodies[i].z) for i in 1:length(bodies)]]
 
 	for _ in 1:framecount
 		step!(bodies, Δt)
