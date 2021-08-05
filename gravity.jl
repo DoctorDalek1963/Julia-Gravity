@@ -333,7 +333,7 @@ function parseargs(progname::String, args::Vector{String})
 	end
 
 	if !quiet
-		println("These are the arguments needed to recreate this simulation:")
+		println("\nThese are the arguments needed to recreate this simulation:\n")
 		println(command)
 		println()
 	end
