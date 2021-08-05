@@ -2,3 +2,5 @@ Manifest.toml
 
 *.gif
 !cool_gifs/*.gif
+
+command_log.txt
