@@ -178,12 +178,14 @@ function parseargs(progname::String, args::Vector{String})
 		if startswith(arg, "m")
 			datalist = split(split(arg, " ")[2], ",")
 			nums = parsenums(datalist[1], n)
-			value = datalist[2]
+
+			value = parse(Float64, datalist[2])
+			if value < 0; error("Mass must not be negative"); end
 
 			for i in 1:n
 				# If this is a body that we want to edit
 				if in(i, nums)
-					templatebodies[i].m = parse(Float64, value)
+					templatebodies[i].m = value
 				end
 			end
 
