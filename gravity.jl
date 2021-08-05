@@ -39,7 +39,7 @@ function Body(tb::TemplateBody)::Body
 end
 
 """
-    parsenums(num::String, len::Int64)
+    parsenums(num::String, len::Int)
 
 Parse the string `num` and return a list of all indices to target.
 
@@ -48,27 +48,27 @@ then we throw an error.
 
 See also: [`parseargs`](@ref)
 """
-function parsenums(num::String, len::Int64)::Vector{Int64}
+function parsenums(num::String, len::Int)::Vector{Int}
 	if num == "a"
 		return [1:len;]
 
 	# If it's not a range or group
 	elseif !occursin("-", num) && !occursin(".", num)
-		n = parse(Int64, num)
+		n = parse(Int, num)
 		if n > len; error("You cannot select body $n; there are only $len bodies."); end
 		return [n]
 
 	# If it's not a range but it is a group
 	elseif !occursin("-", num) && occursin(".", num)
-		ns = [parse(Int64, i) for i in split(num, ".")]
+		ns = [parse(Int, i) for i in split(num, ".")]
 
 		if max(ns...) > len; error("You cannot select body $(max(ns...)); there are only $len bodies."); end
 		return ns
 
 	# If it's a range but not a group
 	elseif occursin("-", num) && !occursin(".", num)
-		first = parse(Int64, split(num, "-")[1])
-		second = parse(Int64, split(num, "-")[2])
+		first = parse(Int, split(num, "-")[1])
+		second = parse(Int, split(num, "-")[2])
 		ns = [first:second;]
 
 		if max(ns...) > len; error("You cannot select body $(max(ns...)); there are only $len bodies."); end
@@ -85,7 +85,7 @@ function parsenums(num::String, len::Int64)::Vector{Int64}
 end
 
 # When we recur, we're calling parsenums with SubString{String}, so we have to convert it to String
-parsenums(a::SubString{String}, b::Int64) = parsenums(string(a), b)
+parsenums(a::SubString{String}, b::Int) = parsenums(string(a), b)
 
 """
     parseargs(progname, args)
@@ -126,8 +126,8 @@ function parseargs(progname::String, args::Vector{String})
 	# the whitespace from the end of each element
 	arglist = strip.(split(connectedargs, " -", keepempty=false))
 
-	n::Union{Int64, Nothing} = nothing
-	frames::Union{Int64, Nothing} = nothing
+	n::Union{Int, Nothing} = nothing
+	frames::Union{Int, Nothing} = nothing
 	Δt::Float64 = 60.0
 	cube = false
 	initialbounds = false
@@ -142,14 +142,14 @@ function parseargs(progname::String, args::Vector{String})
 			if !isnothing(n) # If we're trying to redefine n
 				error("-n may only be defined once")
 			else
-				n = parse(Int64, split(arg, " ")[2])
+				n = parse(Int, split(arg, " ")[2])
 			end
 
 		elseif startswith(arg, "f")
 			if !isnothing(frames) # If we're trying to redefine n
 				error("-f may only be defined once")
 			else
-				frames = parse(Int64, split(arg, " ")[2])
+				frames = parse(Int, split(arg, " ")[2])
 			end
 
 		elseif startswith(arg, "t")
