@@ -126,8 +126,8 @@ function parseargs(progname::String, args::Vector{String})
 	# the whitespace from the end of each element
 	arglist = strip.(split(connectedargs, " -", keepempty=false))
 
-	n = 0
-	frames = 0
+	n::Union{Int64, Nothing} = nothing
+	frames::Union{Int64, Nothing} = nothing
 	Δt::Float64 = 60.0
 	cube = false
 	initialbounds = false
@@ -139,15 +139,15 @@ function parseargs(progname::String, args::Vector{String})
 		arg = arglist[i]
 
 		if startswith(arg, "n")
-			if n != 0 # If we're trying to redefine n
-				throw(ErrorException("-n may only be defined once"))
+			if !isnothing(n) # If we're trying to redefine n
+				error("-n may only be defined once")
 			else
 				n = parse(Int64, split(arg, " ")[2])
 			end
 
 		elseif startswith(arg, "f")
-			if frames != 0 # If we're trying to redefine n
-				throw(ErrorException("-f may only be defined once"))
+			if !isnothing(frames) # If we're trying to redefine n
+				error("-f may only be defined once")
 			else
 				frames = parse(Int64, split(arg, " ")[2])
 			end
@@ -166,6 +166,9 @@ function parseargs(progname::String, args::Vector{String})
 			quiet = true
 		end
 	end
+
+	if isnothing(n); error("-n must be specified"); end
+	if isnothing(frames); error("-f must be specified"); end
 
 	templatebodies = MVector{n, TemplateBody}([TemplateBody() for _ in 1:n]...)
 
@@ -201,6 +204,11 @@ function parseargs(progname::String, args::Vector{String})
 
 			# If we don't have any special selectors and they're just positional
 			if !occursin("x", data) && !occursin("y", data) && !occursin("z", data)
+				# If we don't have the right number of values
+				if length(datalist) != 2 && length(datalist) != 4
+					error("-p only accepts 1 or 3 positional values, not $(length(datalist[2:end]))")
+				end
+
 				# If we've only got 1 number, use that for all
 				if length(datalist[2:end]) == 1
 					templatebodies[num].x = parse(Float64, datalist[2])
@@ -233,6 +241,11 @@ function parseargs(progname::String, args::Vector{String})
 
 			# If we don't have any special selectors and they're just positional
 			if !occursin("x", data) && !occursin("y", data) && !occursin("z", data)
+				# If we don't have the right number of values
+				if length(datalist) != 2 && length(datalist) != 4
+					error("-v only accepts 1 or 3 positional values, not $(length(datalist[2:end]))")
+				end
+
 				# If we've only got 1 number, use that for all
 				if length(datalist[2:end]) == 1
 					values = [parse(Float64, datalist[2]) for _ in 1:3]
