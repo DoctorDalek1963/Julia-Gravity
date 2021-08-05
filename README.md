@@ -5,7 +5,7 @@ This is a small Julia project to do an n-body gravity simulation with command li
 # Command Line Arguments
 
 ## Usage
-`./gravity.jl [--help] -n <number> -f <frames> [-t <seconds>] [--cube] [--initial-bounds] [options]`
+`./gravity.jl [--help] -n <number> -f <frames> [-t <seconds>] [--cube] [--initial-bounds] [--quiet] [attribute options]`
 
 ## Description
 gravity.jl is a program designed to simulate gravity with any number of bodies and produce a GIF.
@@ -18,6 +18,8 @@ The `--cube` flag will give the plot cubic bounds, making the aspect ratio less 
 
 The `--initial-bounds` flag sets the bounds of the plot to only contain the initial positions. Normally, if one or more bodies flies far away from the initial area, then the plot will have bounds to include its final position. This means that all of the interesting motion is concentrated in the centre and is hard to see. With the `--initial-bounds` flag, the camera will only focus on the initial area and any bodies that fly away will be ignored.
 
+The `--quiet` flag will suppress the terminal output of the full command. It will still always be written to `command_log.txt`.
+
 There are three options to specify attributes of bodies. They are as follows:
 
 `-m n,m`       Set the mass of body number `n` to be `m` kg.<br>
@@ -26,7 +28,7 @@ There are three options to specify attributes of bodies. They are as follows:
 
 These are all optional and if any attribute is not specified for any particular body, then it will be randomly generated with a suitable range of values for that attribute.
 
-The program will output the full commands necessary to recreate a simulation, so if you generate one with random attributes, you can use this output to generate the same simulation, but with more frames, for example.
+The program will output the full command necessary to recreate a simulation, so if you generate one with random attributes, you can use this output to generate the same simulation, but with more frames, for example. If you use the `--quiet` flag, the command will still be written to `command_log.txt` with the time it was run.
 
 With the `-p` and `-v` flags, you can either specify all `x,y,z` coordinates or you can specify a single number in place of `x,y,z` to set them all to the same thing.  
 You can also use precise selectors, so you can specify just part of the attribute. For example, `-v a,x15,z0` will give all bodies a velocity of 15 m/s in the x direction, 0 m/s in the z direction, and a random velocity in the y direction.

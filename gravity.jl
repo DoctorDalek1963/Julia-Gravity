@@ -1,5 +1,7 @@
 #!/usr/bin/env julia
 
+using Dates
+
 include("library.jl")
 
 """
@@ -33,7 +35,7 @@ function Body(tb::TemplateBody)::Body
 	if isnothing(tb.v[2]); error("Velocity y component must not be nothing"); end
 	if isnothing(tb.v[3]); error("Velocity z component must not be nothing"); end
 
-	Body{Float64}(tb.m, tb.x, tb.y, tb.z, MVector{3, Float64}(tb.v[1], tb.v[2], tb.v[3]))
+	Body(tb.m, tb.x, tb.y, tb.z, MVector{3, Float64}(tb.v[1], tb.v[2], tb.v[3]))
 end
 
 """
@@ -98,17 +100,18 @@ function parseargs(progname::String, args::Vector{String})
 
 	if occursin("--help", connectedargs) || occursin("-h", connectedargs) || length(args) < 4 # We need at least 4 args
 		println("""
-				Usage: $progname [--help] [--cube] -n <number> -f <frames> [-t <seconds>] [options]
+				Usage: $progname [--help] -n <number> -f <frames> [-t <seconds>] [--cube] [--initial-bounds] [--quiet] [attribute options]
 
 				Options:
 				  --help, -h         Display this help text.
 
-				  --cube             Give the plot cubic bounds.
-				  --initial-bounds   Give the plot bounds to only include the initial positions.
-
 				  -n <number>        The number of bodies.
 				  -f <frames>        The number of frames to use in the GIF.
 				  -t <seconds>       The time step in seconds (default 60).
+
+				  --cube             Give the plot cubic bounds.
+				  --initial-bounds   Give the plot bounds to only include the initial positions.
+				  --quiet            Suppress terminal output; only write command to log file.
 
 				  -m n,m             Set the mass of body number n to be m kg.
 				  -p n,x,y,z         Set the initial position of body number n to be (x, y, z).
@@ -128,6 +131,7 @@ function parseargs(progname::String, args::Vector{String})
 	Δt::Float64 = 60.0
 	cube = false
 	initialbounds = false
+	quiet = false
 
 	# We loop through and get all the meta values before getting the body attributes
 	# This allows us to make a fixed length StaticArray of TemplateBody objects
@@ -157,6 +161,9 @@ function parseargs(progname::String, args::Vector{String})
 
 		elseif arg == "-initial-bounds"
 			initialbounds = true
+
+		elseif arg == "-quiet"
+			quiet = true
 		end
 	end
 
@@ -296,19 +303,28 @@ function parseargs(progname::String, args::Vector{String})
 		bounds = nothing
 	end
 
-	println("These are the arguments needed to recreate this simulation:")
-
-	print("$progname -n $n -f $frames -t $Δt")
-	if cube; print(" --cube"); end
-	if initialbounds; print(" --initial-bounds"); end
+	# Generate the command and log it
+	command = ""
+	command *= "$progname -n $n -f $frames -t $Δt"
+	if cube; command *= " --cube"; end
+	if initialbounds; command *= " --initial-bounds"; end
 
 	for i in 1:n
 		b = bodies[i]
-		print(" -m $i,$(b.m) -p $i,$(b.x),$(b.y),$(b.z) -v $i,$(b.v[1]),$(b.v[2]),$(b.v[3])")
+		command *= " -m $i,$(b.m) -p $i,$(b.x),$(b.y),$(b.z) -v $i,$(b.v[1]),$(b.v[2]),$(b.v[3])"
 	end
 
-	println()
-	println()
+	# Write the command to the log file
+	open("command_log.txt", "a") do file
+		write(file, "[$(Dates.now())] $command\n\n")
+	end
+
+	if !quiet
+		println("These are the arguments needed to recreate this simulation:")
+		println(command)
+		println()
+	end
+
 	println("Simulating...")
 	creategif(bodies, frames, Δt, cube, bounds)
 end
