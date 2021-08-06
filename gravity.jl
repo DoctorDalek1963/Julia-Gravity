@@ -177,6 +177,8 @@ function parseargs(progname::String, args::Vector{String})
 
 		if startswith(arg, "m")
 			datalist = split(split(arg, " ")[2], ",")
+			if length(datalist) > 2; error("Mass only accepts one value"); end
+
 			nums = parsenums(datalist[1], n)
 
 			value = parse(Float64, datalist[2])
