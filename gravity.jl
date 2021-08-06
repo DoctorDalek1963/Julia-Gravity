@@ -342,6 +342,7 @@ function parseargs(progname::String, args::Vector{String})
 
 	println("Simulating...")
 	creategif(bodies, frames, Δt, cube, bounds)
+	println("Saved simulation to out.gif")
 end
 
 if abspath(PROGRAM_FILE) == @__FILE__

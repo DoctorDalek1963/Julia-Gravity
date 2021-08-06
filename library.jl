@@ -217,14 +217,26 @@ function drawgif(positions::Vector{Vector{SVector{3, Float64}}}, cube::Bool, bou
 		legend = false,
 	)
 
-	# For each frame
-	@gif for i in 1:length(positions)
-		# For each body in this frame
-		for j in 1:length(positions[i])
-			bodydata = positions[i][j]
-			push!(plt, j, bodydata[1], bodydata[2], bodydata[3])
+	# This is the expanded form of the @gif macro over a for loop
+	# We're using the expanded form rather than the macro itself because
+	# that lets us control the filename
+	anim = Plots.Animation()
+	let counter = 1
+		# For each frame
+		for i = 1:length(positions)
+			# For each body in this frame
+			for j in 1:length(positions[i])
+				bodydata = positions[i][j]
+				push!(plt, j, bodydata[1], bodydata[2], bodydata[3])
+			end
+
+			if mod1(counter, 10) == 1
+				Plots.frame(anim)
+			end
+			counter += 1
 		end
-	end every 10
+	end # let context
+	Plots.gif(anim, "./out.gif")
 end
 
 """
