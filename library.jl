@@ -209,7 +209,7 @@ function drawgif(positions::Vector{Vector{SVector{3, Float64}}}, cube::Bool, bou
 
 	# We have 4 different subplots. xyz is the 3D perspective camera angle. The others are the orthogonal views.
 	# We then put these subplots into a full plot to show everything comprehensively
-	xyz = plot3d(n; legend=false, lw=1, title="$n Body Gravity Sim", xlim=xlimits, ylim=ylimits, zlim=zlimits)
+	xyz = plot3d(n; legend=false, lw=1, title="$n Body Gravity Simulation", xlim=xlimits, ylim=ylimits, zlim=zlimits)
 	# We're using standard 2D line plots here to avoid issues with cameras in 3D space
 	xy = plot(n; legend=false, lw=0.5, title="Plan", titlefontsize=8, xlim=xlimits, ylim=ylimits, tickfontsize=4)
 	xz = plot(n; legend=false, lw=0.5, title="Front", titlefontsize=8, xlim=xlimits, ylim=zlimits, tickfontsize=4)
