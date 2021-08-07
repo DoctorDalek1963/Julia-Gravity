@@ -210,11 +210,10 @@ function drawgif(positions::Vector{Vector{SVector{3, Float64}}}, cube::Bool, bou
 	# We have 4 different subplots. xyz is the 3D perspective camera angle. The others are the orthogonal views.
 	# We then put these subplots into a full plot to show everything comprehensively
 	xyz = plot3d(n; legend=false, lw=1, title="$n Body Gravity Sim", xlim=xlimits, ylim=ylimits, zlim=zlimits)
-	# We're using tickfontsize=1 to mostly get rid of the numbers on the ticks
-	# We can't set the font size to 0 and ticks=false will get rid of the grid lines, which we don't want
-	xy = plot3d(n; legend=false, lw=0.5, title="Plan", titlefontsize=8, xlim=xlimits, ylim=ylimits, zlim=zlimits, camera=(0, 90), tickfontsize=1)
-	xz = plot3d(n; legend=false, lw=0.5, title="Front", titlefontsize=8, xlim=xlimits, ylim=ylimits, zlim=zlimits, camera=(0, 0), tickfontsize=1)
-	yz = plot3d(n; legend=false, lw=0.5, title="Side", titlefontsize=8, xlim=xlimits, ylim=ylimits, zlim=zlimits, camera=(90, 0), tickfontsize=1)
+	# We're using standard 2D line plots here to avoid issues with cameras in 3D space
+	xy = plot(n; legend=false, lw=0.5, title="Plan", titlefontsize=8, xlim=xlimits, ylim=ylimits, tickfontsize=4)
+	xz = plot(n; legend=false, lw=0.5, title="Front", titlefontsize=8, xlim=xlimits, ylim=zlimits, tickfontsize=4)
+	yz = plot(n; legend=false, lw=0.5, title="Side", titlefontsize=8, xlim=ylimits, ylim=zlimits, tickfontsize=4)
 
 	# This is the expanded form of the @gif macro over a for loop
 	# We're using the expanded form rather than the macro itself because
@@ -228,9 +227,9 @@ function drawgif(positions::Vector{Vector{SVector{3, Float64}}}, cube::Bool, bou
 			# We add the position data of every body to its respective series in the plots
 			bodydata = positions[i][j]
 			push!(xyz, j, bodydata[1], bodydata[2], bodydata[3])
-			push!(xy, j, bodydata[1], bodydata[2], bodydata[3])
-			push!(xz, j, bodydata[1], bodydata[2], bodydata[3])
-			push!(yz, j, bodydata[1], bodydata[2], bodydata[3])
+			push!(xy, j, bodydata[1], bodydata[2])
+			push!(xz, j, bodydata[1], bodydata[3])
+			push!(yz, j, bodydata[2], bodydata[3])
 		end
 
 		# Only if this counter is a multiple of 10, do we add this frame to the animation
