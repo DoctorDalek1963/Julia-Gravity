@@ -28,7 +28,7 @@ The user must specify a number of bodies with `-n`, and a number of frames with 
 
 The `--cube` flag will give the plot cubic bounds, making the aspect ratio less distorting, but this will likely make the action of the bodies harder to see. Leaving out the `--cube` flag will give the plot tight bounds, so that the camera is better focussed on the action of the bodies. This is default.
 
-The `--initial-bounds` flag sets the bounds of the plot to only contain the initial positions. Normally, if one or more bodies flies far away from the initial area, then the plot will have bounds to include its final position. This means that all of the interesting motion is concentrated in the centre and is hard to see. With the `--initial-bounds` flag, the camera will only focus on the initial area and any bodies that fly away will be ignored. This might mean that the motion of all bodies moves out of bounds, however.
+The `--initial-bounds` flag sets the bounds of the plot to only contain the initial positions. Normally, if one or more bodies flies far away from the initial area, then the plot will have bounds to include its final position. This means that all of the interesting motion is concentrated in the centre and is hard to see. With the `--initial-bounds` flag, the camera will only focus on the initial area and any bodies that fly away will be ignored. This might mean that the motion of all bodies moves out of bounds, however, and it often cuts things off on the 3 orthogonal cameras.
 
 The `--quiet` flag will suppress the terminal output of the full command. It will still always be written to a file called `command_log.txt` along with the time the command was run, no matter what.
 
