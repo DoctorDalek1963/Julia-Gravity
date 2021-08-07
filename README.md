@@ -67,7 +67,7 @@ Now you're ready to run `gravity.jl` with the arguments explained above. On MacO
 
 <img alt="8 body random sim gif" src="https://raw.githubusercontent.com/DoctorDalek1963/Julia-Gravity/main/cool_gifs/8_body_random2.gif" />
 
-This gif was unfortunately generated before I implemented argument output, so I don't know what initial conditions it had, but this is a good example of the interesting behaviour that can emerge from random conditions.
+This gif was unfortunately generated before I implemented multiple cameras and argument output, so I don't know what initial conditions it had, but this is a good example of the interesting behaviour that can emerge from random conditions.
 
 <img alt="5 body random sim gif" src="https://raw.githubusercontent.com/DoctorDalek1963/Julia-Gravity/main/cool_gifs/example_1.gif" />
 
