@@ -65,10 +65,6 @@ Now you're ready to run `gravity.jl` with the arguments explained above. On MacO
 
 # Example GIFs
 
-<img alt="8 body random sim gif" src="https://raw.githubusercontent.com/DoctorDalek1963/Julia-Gravity/main/cool_gifs/8_body_random2.gif" />
-
-This gif was unfortunately generated before I implemented multiple cameras and argument output, so I don't know what initial conditions it had, but this is a good example of the interesting behaviour that can emerge from random conditions.
-
 <img alt="5 body random sim gif" src="https://raw.githubusercontent.com/DoctorDalek1963/Julia-Gravity/main/cool_gifs/example_1.gif" />
 
 This gif was generated randomly and can be recreated with the rather verbose command `./gravity.jl -n 5 -f 2000 -t 60.0 --initial-bounds -m 1,6.3865954366971175e22 -p 1,-1.046485995157114e7,-1.1831052719693702e7,-2.6124825559583876e7 -v 1,602.2471821174969,88.0355239859146,-495.0546023282165 -m 2,3.804158913293605e22 -p 2,-4.086806858434652e6,1.9348056090842357e6,-2.8617446571503744e7 -v 2,126.54203553393488,-63.085411086555666,-1527.467404647707 -m 3,6.395369975409342e22 -p 3,6.869456059422254e6,-3.157228773415399e6,-3.161737269857981e7 -v 3,-32.53353053414486,-25.268658357766032,22.209676234563126 -m 4,4.915573852388649e23 -p 4,-2.1807002632697403e7,2.3497704125483662e7,7.232159300847966e6 -v 4,-270.2588160830812,117.2775111366177,-299.9622743423679 -m 5,1.6248795696763953e23 -p 5,-1.3716253056501677e7,8.498209911887344e6,-1.475952193047466e7 -v 5,56.02793615046529,665.5571009664108,-85.70102444687495`
