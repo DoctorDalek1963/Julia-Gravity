@@ -35,6 +35,7 @@ function getforce(b1::Body, b2::Body)::Float64
 	c = b1.z - b2.z
 
 	r2 = a^2 + b^2 + c^2
+	if r2 == 0; error("Cannot divide by 0. The positions of two bodies cannot be the same."); end
 
 	# G \frac{m_1 m_2}{r^2}
 	(6.674e-11 * b1.m * b2.m) / r2
