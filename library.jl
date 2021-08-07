@@ -175,9 +175,9 @@ function drawgif(positions::Vector{Vector{SVector{3, Float64}}}, cube::Bool, bou
 
 	elseif !cube && !isnothing(bounds)
 		# We just use the bounds given, multiplied by the multiplier
-		xlimits = (multiplier * bounds[1][1], multiplier * bounds[1][2])
-		ylimits = (multiplier * bounds[2][1], multiplier * bounds[2][2])
-		zlimits = (multiplier * bounds[3][1], multiplier * bounds[3][2])
+		xlimits = multiplier .* bounds[1]
+		ylimits = multiplier .* bounds[2]
+		zlimits = multiplier .* bounds[3]
 
 	elseif cube && isnothing(bounds)
 		# This line gets absolute value of every float in positions and then gets the max
@@ -199,43 +199,48 @@ function drawgif(positions::Vector{Vector{SVector{3, Float64}}}, cube::Bool, bou
 		ys = [positions[i][j][2] for i in 1:length(positions) for j in 1:length(positions[1])]
 		zs = [positions[i][j][3] for i in 1:length(positions) for j in 1:length(positions[1])]
 
-		xlimits = (multiplier * min(xs...), multiplier * max(xs...))
-		ylimits = (multiplier * min(ys...), multiplier * max(ys...))
-		zlimits = (multiplier * min(zs...), multiplier * max(zs...))
+		xlimits = multiplier .* extrema(xs)
+		ylimits = multiplier .* extrema(ys)
+		zlimits = multiplier .* extrema(zs)
 	end
 
 	# This is just the number of bodies
 	n = length(positions[1])
 
-	plt = plot3d(
-		n, # This is n series so we can plot each body
-		xlim = xlimits,
-		ylim = ylimits,
-		zlim = zlimits,
-		title = "$n Body Gravity Sim",
-		marker = 1,
-		legend = false,
-	)
+	# We have 4 different subplots. xyz is the 3D perspective camera angle. The others are the orthogonal views.
+	# We then put these subplots into a full plot to show everything comprehensively
+	xyz = plot3d(n; legend=false, lw=1, title="$n Body Gravity Sim", xlim=xlimits, ylim=ylimits, zlim=zlimits)
+	# We're using tickfontsize=1 to mostly get rid of the numbers on the ticks
+	# We can't set the font size to 0 and ticks=false will get rid of the grid lines, which we don't want
+	xy = plot3d(n; legend=false, lw=0.5, title="Plan", titlefontsize=8, xlim=xlimits, ylim=ylimits, zlim=zlimits, camera=(0, 90), tickfontsize=1)
+	xz = plot3d(n; legend=false, lw=0.5, title="Front", titlefontsize=8, xlim=xlimits, ylim=ylimits, zlim=zlimits, camera=(0, 0), tickfontsize=1)
+	yz = plot3d(n; legend=false, lw=0.5, title="Side", titlefontsize=8, xlim=xlimits, ylim=ylimits, zlim=zlimits, camera=(90, 0), tickfontsize=1)
 
 	# This is the expanded form of the @gif macro over a for loop
 	# We're using the expanded form rather than the macro itself because
 	# that lets us control the filename
 	anim = Plots.Animation()
-	let counter = 1
-		# For each frame
-		for i = 1:length(positions)
-			# For each body in this frame
-			for j in 1:length(positions[i])
-				bodydata = positions[i][j]
-				push!(plt, j, bodydata[1], bodydata[2], bodydata[3])
-			end
-
-			if mod1(counter, 10) == 1
-				Plots.frame(anim)
-			end
-			counter += 1
+	counter = 1
+	# For each frame
+	for i = 1:length(positions)
+		# For each body in this frame
+		for j in 1:length(positions[i])
+			# We add the position data of every body to its respective series in the plots
+			bodydata = positions[i][j]
+			push!(xyz, j, bodydata[1], bodydata[2], bodydata[3])
+			push!(xy, j, bodydata[1], bodydata[2], bodydata[3])
+			push!(xz, j, bodydata[1], bodydata[2], bodydata[3])
+			push!(yz, j, bodydata[1], bodydata[2], bodydata[3])
 		end
-	end # let context
+
+		# Only if this counter is a multiple of 10, do we add this frame to the animation
+		if counter % 10 == 0
+			layout = @layout [a{0.7h}; b c d]
+			Plots.frame(anim, plot(xyz, xy, xz, yz; layout, size=(1000, 1000)))
+		end
+
+		counter += 1
+	end
 	Plots.gif(anim, "./out.gif")
 end
 
