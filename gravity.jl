@@ -56,6 +56,7 @@ function parsenums(num::String, len::Int)::Vector{Int}
 	elseif !occursin("-", num) && !occursin(".", num)
 		n = parse(Int, num)
 		if n > len; error("You cannot select body $n; there are only $len bodies."); end
+		if n < 1; error("You cannot select body number $n; the minimum is 1."); end
 		return [n]
 
 	# If it's not a range but it is a group
@@ -63,6 +64,7 @@ function parsenums(num::String, len::Int)::Vector{Int}
 		ns = [parse(Int, i) for i in split(num, ".")]
 
 		if max(ns...) > len; error("You cannot select body $(max(ns...)); there are only $len bodies."); end
+		if min(ns...) < 1; error("You cannot select body number $(min(ns...)); the minimum is 1."); end
 		return ns
 
 	# If it's a range but not a group
@@ -72,6 +74,7 @@ function parsenums(num::String, len::Int)::Vector{Int}
 		ns = [first:second;]
 
 		if max(ns...) > len; error("You cannot select body $(max(ns...)); there are only $len bodies."); end
+		if min(ns...) < 1; error("You cannot select body number $(min(ns...)); the minimum is 1."); end
 		return ns
 
 	# If it's both a range and a group
@@ -143,6 +146,7 @@ function parseargs(progname::String, args::Vector{String})
 				error("-n may only be defined once")
 			else
 				n = parse(Int, split(arg, " ")[2])
+				if n < 1; error("n must be at least 1, not $n."); end
 			end
 
 		elseif startswith(arg, "f")
@@ -150,6 +154,7 @@ function parseargs(progname::String, args::Vector{String})
 				error("-f may only be defined once")
 			else
 				frames = parse(Int, split(arg, " ")[2])
+				if frames < 1; error("frames must be at least 1, not $frames."); end
 			end
 
 		elseif startswith(arg, "t")
