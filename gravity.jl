@@ -44,7 +44,7 @@ end
 Parse the string `num` and return a list of all indices to target.
 
 `len` is the length of the bodies list. If any number is larger than it,
-then we throw an error.
+then we throw an error. If any number is less than 1, we throw an error.
 
 See also: [`parseargs`](@ref)
 """

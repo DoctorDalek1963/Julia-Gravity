@@ -78,9 +78,9 @@ function getforcevector(b1::Body, b2::Body)::MVector{3, Float64}
 end
 
 """
-    step!(b1, b2, Δt)
+    step!(bodies, Δt)
 
-Apply forces between Body objects `b1` and `b2` over time step `Δt` seconds.
+Apply forces between all Body objects in `bodies` over time step `Δt` seconds.
 """
 function step!(bodies::Vector{Body}, Δt::Float64)
 	# Calculate the force on each body and update its velocity accordingly
@@ -126,7 +126,7 @@ end
 
 Return frame data for the list of Body objects `bodies` with time step `Δt`.
 
-This frame data is a Vector{Vector{Vector{Float64}}}. It can be thought of as a list of frames,
+This frame data is a Vector{Vector{SVector{3, Float64}}}. It can be thought of as a list of frames,
 where each frame has a list of bodies, and each body has a list of x y z coordinates.
 
 See also: [`drawgif`](@ref), [`creategif`](@ref)
@@ -151,7 +151,7 @@ end
 
 Draw a GIF using the position data.
 
-`positions` is a Vector{Vector{Vector{Float64}}}. It can be thought of as a list of frames,
+`positions` is a Vector{Vector{SVector{3, Float64}}}. It can be thought of as a list of frames,
 where each frame has a list of bodies, and each body has a list of x y z coordinates.
 
 `cube` is a bool for whether to draw the plot bounds as a cube.
