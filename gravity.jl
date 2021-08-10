@@ -103,7 +103,7 @@ function parseargs(progname::String, args::Vector{String})
 
 	if occursin("--help", connectedargs) || occursin("-h", connectedargs) || length(args) < 4 # We need at least 4 args
 		println("""
-				Usage: $progname [--help] -n <number> -f <frames> [-t <seconds>] [-F <filename>] [--cube] [--initial-bounds] [--quiet] [attribute options]
+				Usage: $(Sys.iswindows() ? "julia " : "")$progname [--help] -n <number> -f <frames> [-t <seconds>] [-F <filename>] [--cube] [--initial-bounds] [--quiet] [attribute options]
 
 				Options:
 				  --help, -h         Display this help text.
