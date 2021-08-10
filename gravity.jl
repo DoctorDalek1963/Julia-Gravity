@@ -103,7 +103,7 @@ function parseargs(progname::String, args::Vector{String})
 
 	if occursin("--help", connectedargs) || occursin("-h", connectedargs) || length(args) < 4 # We need at least 4 args
 		println("""
-				Usage: $progname [--help] -n <number> -f <frames> [-t <seconds>] [--cube] [--initial-bounds] [--quiet] [attribute options]
+				Usage: $progname [--help] -n <number> -f <frames> [-t <seconds>] [-F <filename>] [--cube] [--initial-bounds] [--quiet] [attribute options]
 
 				Options:
 				  --help, -h         Display this help text.
@@ -111,6 +111,7 @@ function parseargs(progname::String, args::Vector{String})
 				  -n <number>        The number of bodies.
 				  -f <frames>        The number of frames to use in the GIF.
 				  -t <seconds>       The time step in seconds (default 60).
+				  -F <filename>      The name of the gif (will generate a unique name if not specified).
 
 				  --cube             Give the plot cubic bounds.
 				  --initial-bounds   Give the plot bounds to only include the initial positions.
@@ -132,6 +133,7 @@ function parseargs(progname::String, args::Vector{String})
 	n::Union{Int, Nothing} = nothing
 	frames::Union{Int, Nothing} = nothing
 	Δt::Float64 = 60.0
+	filename::Union{String, Nothing} = nothing
 	cube = false
 	initialbounds = false
 	quiet = false
@@ -159,6 +161,9 @@ function parseargs(progname::String, args::Vector{String})
 
 		elseif startswith(arg, "t")
 			Δt = parse(Float64, split(arg, " ")[2])
+
+		elseif startswith(arg, "F")
+			filename = split(arg, " ")[2]
 
 		# We need 1 "-" here because we split by " -" and these args are long form
 		elseif arg == "-cube"
@@ -328,6 +333,7 @@ function parseargs(progname::String, args::Vector{String})
 	# Generate the command and log it
 	command = ""
 	command *= "$progname -n $n -f $frames -t $Δt"
+	if !isnothing(filename); command *= " -F $filename"; end
 	if cube; command *= " --cube"; end
 	if initialbounds; command *= " --initial-bounds"; end
 
@@ -348,8 +354,8 @@ function parseargs(progname::String, args::Vector{String})
 	end
 
 	println("Simulating...")
-	creategif(bodies, frames, Δt, cube, bounds)
-	println("Saved simulation to out.gif")
+	creategif(bodies, frames, Δt, cube, bounds, filename)
+	println("Saved gif")
 end
 
 if abspath(PROGRAM_FILE) == @__FILE__

@@ -17,7 +17,7 @@ Please note: generating GIFs can take 30-60 seconds, often slower if you're tryi
 # Command Line Arguments
 
 ## Usage
-`./gravity.jl [--help] -n <number> -f <frames> [-t <seconds>] [--cube] [--initial-bounds] [--quiet] [attribute options]`
+`./gravity.jl [--help] -n <number> -f <frames> [-t <seconds>] [-F <filename>] [--cube] [--initial-bounds] [--quiet] [attribute options]`
 
 ## Description
 gravity.jl is a program designed to simulate gravity with any number of bodies and produce a GIF.
@@ -25,6 +25,8 @@ gravity.jl is a program designed to simulate gravity with any number of bodies a
 The user must specify a number of bodies with `-n`, and a number of frames with `-f`. (A value of 2000 to 4000 frames typically produces a GIF long enough to see interesting movement while being relatively quick to process, although this will vary based on other parameters.) A time step in seconds can also be optionally specified with `-t`. This defaults to 60 seconds.
 
 `-n` and `-f` must be integers, but `-t` can be any real number.
+
+The `-F` argument allows the user to optionally specify a particular filename. If not specified, a unique name will be generated. It is `out.gif` is available, otherwise, the names will increment like `out_1.gif`, `out_2.gif`, always using the lowest number possible. This prevents files from being overwritten.
 
 The `--cube` flag will give the plot cubic bounds, making the aspect ratio less distorting, but this will likely make the action of the bodies harder to see. Leaving out the `--cube` flag will give the plot tight bounds, so that the camera is better focussed on the action of the bodies. This is default.
 

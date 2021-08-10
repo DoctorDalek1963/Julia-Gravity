@@ -161,7 +161,7 @@ If it's nothing (by default), then the bounds will be auto-generated.
 
 See also: [`drawframes`](@ref), [`creategif`](@ref)
 """
-function drawgif(positions::Vector{Vector{SVector{3, Float64}}}, cube::Bool, bounds::Union{Nothing, Vector{Tuple{Float64, Float64}}}=nothing)
+function drawgif(positions::Vector{Vector{SVector{3, Float64}}}, cube::Bool, bounds::Union{Nothing, Vector{Tuple{Float64, Float64}}}=nothing, filename::Union{String, Nothing}=nothing)
 	# This is a multiplier to make the bounding box just a bit bigger than strictly necessary,
 	# just to make it look a bit nicer
 	multiplier = 1.05
@@ -241,7 +241,20 @@ function drawgif(positions::Vector{Vector{SVector{3, Float64}}}, cube::Bool, bou
 
 		counter += 1
 	end
-	Plots.gif(anim, "./out.gif")
+
+	if isnothing(filename)
+		if !in("out.gif", readdir())
+			filename = "out.gif"
+		else
+			i = 1
+			while in("out_$i.gif", readdir())
+				i += 1
+			end
+			filename = "out_$i.gif"
+		end
+	end
+
+	Plots.gif(anim, filename)
 end
 
 """
@@ -256,4 +269,4 @@ If it's nothing (by default), then the plot bounds will be auto-generated.
 
 See also: [`drawgif`](@ref), [`drawframes`](@ref)
 """
-creategif(bodies::Vector{Body}, framecount::Int, Δt::Float64, cube::Bool=false, bounds::Union{Nothing, Vector{Tuple{Float64, Float64}}}=nothing) = drawgif(drawframes(bodies, framecount, Δt), cube, bounds)
+creategif(bodies::Vector{Body}, framecount::Int, Δt::Float64, cube::Bool=false, bounds::Union{Nothing, Vector{Tuple{Float64, Float64}}}=nothing, filename::Union{String, Nothing}=nothing) = drawgif(drawframes(bodies, framecount, Δt), cube, bounds, filename)
