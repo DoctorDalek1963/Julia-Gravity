@@ -1,5 +1,10 @@
 # Julia-Gravity
 
+![License](https://img.shields.io/github/license/DoctorDalek1963/Julia-Gravity)
+![Last Commit](https://img.shields.io/github/last-commit/DoctorDalek1963/Julia-Gravity)
+![Repo Size](https://img.shields.io/github/repo-size/DoctorDalek1963/Julia-Gravity)
+![Code Size](https://img.shields.io/github/languages/code-size/DoctorDalek1963/Julia-Gravity)
+
 This is a small Julia project to do an n-body gravity simulation with command line argument processing. This is my first proper Julia project and I want to use it to learn how to use the language properly.
 
 # Installation
