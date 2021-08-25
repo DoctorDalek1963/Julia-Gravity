@@ -147,7 +147,7 @@ function drawframes(bodies::Vector{Body}, framecount::Int, Δt::Float64)::Vector
 end
 
 """
-    drawgif(positions, cube=false, bounds=nothing)
+    drawgif(positions, cube=false, bounds=nothing, filename=nothing)
 
 Draw a GIF using the position data.
 
@@ -158,6 +158,9 @@ where each frame has a list of bodies, and each body has a list of x y z coordin
 
 `bounds` is a Vector{Tuple{Float64, Float64}} - a list of xlimits, ylimits, and zlimits.
 If it's nothing (by default), then the bounds will be auto-generated.
+
+`filename` is an optional filename. If none is provided, one will be programmatically generated,
+following the pattern of `out.gif`, `out_1.gif`, `out_2.gif`, etc.
 
 See also: [`drawframes`](@ref), [`creategif`](@ref)
 """
@@ -258,7 +261,7 @@ function drawgif(positions::Vector{Vector{SVector{3, Float64}}}, cube::Bool, bou
 end
 
 """
-    creategif(bodies, framecount, Δt, cube=false, bounds=nothing)
+    creategif(bodies, framecount, Δt, cube=false, bounds=nothing, filename=nothing)
 
 Generate a GIF from the list of Body objects `bodies`, with `framecount` frames and a time step of `Δt` seconds.
 
@@ -266,6 +269,9 @@ Generate a GIF from the list of Body objects `bodies`, with `framecount` frames 
 
 `bounds` is a Vector{Tuple{Float64, Float64}} - a list of xlimits, ylimits, and zlimits.
 If it's nothing (by default), then the plot bounds will be auto-generated.
+
+`filename` is an optional filename. If none is provided, one will be programmatically generated,
+following the pattern of `out.gif`, `out_1.gif`, `out_2.gif`, etc.
 
 See also: [`drawgif`](@ref), [`drawframes`](@ref)
 """
