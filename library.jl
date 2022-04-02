@@ -1,4 +1,4 @@
-using Plots: plot3d, plot, Animation, frame, gif, GridLayout, EmptyLayout, create_grid
+using Plots
 using StaticArrays
 
 """
@@ -222,7 +222,7 @@ function drawgif(positions::Vector{Vector{SVector{3, Float64}}}, cube::Bool, bou
 	# This is the expanded form of the @gif macro over a for loop
 	# We're using the expanded form rather than the macro itself because
 	# that lets us control the filename
-	anim = Animation()
+	anim = Plots.Animation()
 	counter = 1
 	# For each frame
 	for i = 1:length(positions)
@@ -238,9 +238,8 @@ function drawgif(positions::Vector{Vector{SVector{3, Float64}}}, cube::Bool, bou
 
 		# Only if this counter is a multiple of 10, do we add this frame to the animation
 		if counter % 10 == 0
-			# I can't directly import the @layout macro, so we do it this way
-			layout = eval(create_grid(:([a{0.7h}; b c d])))
-			frame(anim, plot(xyz, xy, xz, yz; layout = layout, size = (1000, 1000)))
+			layout = @layout [a{0.7h}; b c d]
+			Plots.frame(anim, plot(xyz, xy, xz, yz; layout, size=(1000, 1000)))
 		end
 
 		counter += 1
@@ -258,7 +257,7 @@ function drawgif(positions::Vector{Vector{SVector{3, Float64}}}, cube::Bool, bou
 		end
 	end
 
-	gif(anim, filename)
+	Plots.gif(anim, filename)
 end
 
 """
